@@ -27,7 +27,7 @@ class ChatInterface:
         self.win_chatbox.refresh()
 
     def get_input(self, prompt=''):
-        self.chatbuffer.clear()
+        del self.chatbuffer[:]
         self.chatbuffer.append(prompt)
         self.redraw_chatbox()
 
@@ -40,7 +40,7 @@ class ChatInterface:
                     self.chatbuffer.pop()
             elif inch == ord('\n'):
                 message = ''.join(self.chatbuffer[1:])
-                self.chatbuffer.clear()
+                del self.chatbuffer[:]
                 return message
             elif xpos >= self.win_chatbox.getmaxyx()[1] - 2:
                 continue
