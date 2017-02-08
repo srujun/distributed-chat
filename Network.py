@@ -59,17 +59,31 @@ class Network:
                 self.alive[ip] = [clientsocket, port]
 
 
-    def send_msg(self, msg):
+    def bcast_msg(self, msg):
+        threads = []
         for host in self.alive.keys():
-            logging.debug('Sending "' + msg + '" to ' + host)
-            totalsent = 0
-            while totalsent < len(msg):
+            t = threading.Thread(target=self.send_msg, args=(msg, host))
+            threads.append(t)
+            t.start()
+
+        for thread in threads():
+            thread.join()
+
+
+    def send_msg(self, msg, host):
+        logging.debug('Sending "' + msg + '" to ' + host)
+        totalsent = 0
+        while totalsent < len(msg):
+            try:
                 sent = self.alive[host][0].send(msg[totalsent:])
-                if sent == 0:
-                    # lost connection
-                    logging.debug('Oops, lost connection!')
-                    del self.alive[host]
-                totalsent += sent
+            except socket.error:
+                del self.alive[host]
+                break
+            if sent == 0:
+                # lost connection
+                logging.debug('Oops, lost connection!')
+                del self.alive[host]
+            totalsent += sent
 
 
     def recv_msgs(self):

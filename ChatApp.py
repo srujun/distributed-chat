@@ -40,7 +40,7 @@ def main(stdscr):
             ci.add_message('Online: ' + str(network.alive))
             continue
         ci.add_message(instr, username=username)
-        network.send_msg(username + ': ' + instr)
+        network.bcast_msg(username + ': ' + instr)
 
 
 def recv_thread(network, ci):
