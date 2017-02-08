@@ -4,6 +4,7 @@ import logging
 import socket
 import sys
 import threading
+import time
 
 class Network:
     PORT = 1337
@@ -66,8 +67,14 @@ class Network:
 
     def recv_msgs(self):
         msgs = []
-        for host in self.alive.keys():
-            msgs.append(self.alive[host][0].recv(512))
+
+        if not self.alive:
+            time.sleep(1)
+        else:
+            for host in self.alive.keys():
+                msgs.append(self.alive[host][0].recv(512))
+
+        return msgs
 
 
     def close(self):
