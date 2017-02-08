@@ -35,6 +35,7 @@ class Network:
 
         # start the server thread
         self.server = threading.Thread(target=self.server_thread)
+        self.server.daemon = True
         self.server.start()
 
 
