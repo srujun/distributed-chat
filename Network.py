@@ -7,13 +7,18 @@ import threading
 import time
 
 class Network:
-    PORT = 1337
+    PORT = 13337
 
-    def __init__(self, nodelist, timeout=2):
+    def __init__(self, nodelist, timeout=1):
         logging.basicConfig(filename='network.log',level=logging.DEBUG)
 
         self.nodelist = nodelist
         self.alive = {}
+
+        # start the server thread
+        self.server = threading.Thread(target=self.server_thread)
+        self.server.daemon = True
+        self.server.start()
 
         oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
@@ -34,11 +39,6 @@ class Network:
 
         socket.setdefaulttimeout(oldtimeout)
 
-        # start the server thread
-        self.server = threading.Thread(target=self.server_thread)
-        self.server.daemon = True
-        self.server.start()
-
 
     def server_thread(self):
         ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,7 +49,7 @@ class Network:
             clientsocket, addr = ss.accept()
             ip, port = addr
             logging.debug('Got connection from ' + ip)
-            self.alive[socket.gethostbyname(addr[0])] = [clientsocket, port]
+            self.alive[ip] = [clientsocket, port]
 
 
     def send_msg(self, msg):
@@ -68,14 +68,11 @@ class Network:
     def recv_msgs(self):
         msgs = []
 
-        if not self.alive:
-            time.sleep(1)
-        else:
-            for host in self.alive.keys():
-                try:
-                    msgs.append(self.alive[host][0].recv(512))
-                except socket.timeout:
-                    pass
+        for host in self.alive.keys():
+            try:
+                msgs.append(self.alive[host][0].recv(512))
+            except socket.timeout:
+                pass
 
         return msgs
 
