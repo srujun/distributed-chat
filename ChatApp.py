@@ -24,7 +24,7 @@ def main(stdscr):
 
     network = Network(nodelist)
     # network.send_hello()
-    ci.add_message('Connected to: ')
+    ci.add_message('Connected to: ' + str(network.alive.keys()))
     ci.add_message('')
 
     receiver = threading.Thread(target=recv_thread, args=(network, ci))
@@ -40,7 +40,7 @@ def main(stdscr):
             ci.add_message('Online: ' + str(network.alive.keys()))
             continue
         ci.add_message(instr, username=username)
-        network.bcast_msg(username + ': ' + instr)
+        network.bcast_msg(username + ': ' + instr + '\n')
 
 
 def recv_thread(network, ci):
