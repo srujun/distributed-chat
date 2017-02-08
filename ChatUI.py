@@ -44,7 +44,7 @@ class ChatInterface:
                 return message
             elif xpos >= self.win_chatbox.getmaxyx()[1] - 2:
                 continue
-            else:
+            elif 32 <= inch <= 255:
                 self.chatbuffer.append(chr(inch))
 
             self.redraw_chatbox()
