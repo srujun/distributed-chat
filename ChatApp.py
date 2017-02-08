@@ -20,11 +20,11 @@ def main(stdscr):
 
     ci.add_message("Welcome to ECE428 Chat App!")
     ci.add_message('Type "/quit" to exit')
+    ci.add_message('Type "/ask" to see who\'s online')
 
-    ci.add_message('Beginning connecting to other nodes, may take a while...')
     network = Network(nodelist)
     # network.send_hello()
-    ci.add_message('Finished!')
+    ci.add_message('Connected to: ')
     ci.add_message('')
 
     receiver = threading.Thread(target=recv_thread, args=(network, ci))
@@ -32,12 +32,12 @@ def main(stdscr):
     receiver.start()
 
     while True:
-        instr = ci.get_input(prompt='> ')
+        instr = ci.get_input(prompt=username + ' > ')
         if instr == '/quit':
             network.close()
             break
         if instr == '/ask':
-            ci.add_message('Online: ' + str(network.alive))
+            ci.add_message('Online: ' + str(network.alive.keys()))
             continue
         ci.add_message(instr, username=username)
         network.bcast_msg(username + ': ' + instr)

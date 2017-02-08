@@ -66,7 +66,7 @@ class Network:
             threads.append(t)
             t.start()
 
-        for thread in threads():
+        for thread in threads:
             thread.join()
 
 
@@ -78,6 +78,7 @@ class Network:
                 sent = self.alive[host][0].send(msg[totalsent:])
             except socket.error:
                 del self.alive[host]
+                logging.debug(host + ' went offline...')
                 break
             if sent == 0:
                 # lost connection
