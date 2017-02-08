@@ -27,7 +27,7 @@ def main(stdscr):
     ci.add_message('Finished!')
     ci.add_message('')
 
-    receiver = threading.Thread(target=recv_thread, args=(network,))
+    receiver = threading.Thread(target=recv_thread, args=(network, ci))
     receiver.daemon = True
     receiver.start()
 
@@ -36,11 +36,14 @@ def main(stdscr):
         if instr == '/quit':
             network.close()
             break
+        if instr == '/ask':
+            ci.add_message('Online: ' + str(network.alive))
+            continue
         ci.add_message(instr, username=username)
         network.send_msg(username + ': ' + instr)
 
 
-def recv_thread(network):
+def recv_thread(network, ci):
     while True:
         msgs = network.recv_msgs()
         for msg in msgs:
