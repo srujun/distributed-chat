@@ -46,10 +46,14 @@ class Network:
         ss.listen(10)
         logging.debug('Starting server...')
         while True:
-            clientsocket, addr = ss.accept()
-            ip, port = addr
-            logging.debug('Got connection from ' + ip)
-            self.alive[ip] = [clientsocket, port]
+            try:
+                clientsocket, addr = ss.accept()
+            except socket.timeout:
+                pass
+            else:
+                ip, port = addr
+                logging.debug('Got connection from ' + ip)
+                self.alive[ip] = [clientsocket, port]
 
 
     def send_msg(self, msg):
