@@ -72,7 +72,10 @@ class Network:
             time.sleep(1)
         else:
             for host in self.alive.keys():
-                msgs.append(self.alive[host][0].recv(512))
+                try:
+                    msgs.append(self.alive[host][0].recv(512))
+                except socket.timeout:
+                    pass
 
         return msgs
 
