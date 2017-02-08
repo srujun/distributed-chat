@@ -25,6 +25,9 @@ class Network:
 
         for node, port in nodelist:
             logging.debug('Connecting to ' + node + ':' + str(port))
+            if node == socket.gethostname():
+                logging.debug('Not gonna connect to myself...')
+                continue
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 sock.connect((node, port))
