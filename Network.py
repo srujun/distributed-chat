@@ -53,13 +53,21 @@ class Network:
 
     def send_msg(self, msg):
         for host in self.alive.keys():
+            logging.debug('Sending "' + msg + '" to ' + host)
             totalsent = 0
             while totalsent < len(msg):
                 sent = self.alive[host][0].send(msg[totalsent:])
                 if sent == 0:
                     # lost connection
+                    logging.debug('Oops, lost connection!')
                     del self.alive[host]
                 totalsent += sent
+
+
+    def recv_msgs(self):
+        msgs = []
+        for host in self.alive.keys():
+            msgs.append(self.alive[host][0].recv(512))
 
 
     def close(self):

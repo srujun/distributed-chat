@@ -1,4 +1,6 @@
 import curses
+import threading
+
 from ChatUI import ChatInterface
 from Network import Network
 
@@ -18,12 +20,16 @@ def main(stdscr):
 
     ci.add_message("Welcome to ECE428 Chat App!")
     ci.add_message('Type "/quit" to exit')
-    ci.add_message('Beginning connecting to other nodes, may take a while...')
-    ci.add_message('')
 
+    ci.add_message('Beginning connecting to other nodes, may take a while...')
     network = Network(nodelist)
     # network.send_hello()
     ci.add_message('Finished!')
+    ci.add_message('')
+
+    receiver = threading.Thread(target=recv_thread, args=(network,))
+    receiver.daemon = True
+    receiver.start()
 
     while True:
         instr = ci.get_input(prompt='> ')
@@ -31,6 +37,15 @@ def main(stdscr):
             network.close()
             break
         ci.add_message(instr, username=username)
+        network.send_msg(username + ': ' + instr)
+
+
+def recv_thread(network):
+    while True:
+        msgs = network.recv_msgs()
+        for msg in msgs:
+            if msg:
+                ci.add_message(msg)
 
 
 if __name__ == '__main__':
