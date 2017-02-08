@@ -15,13 +15,13 @@ class Network:
         self.nodelist = nodelist
         self.alive = {}
 
+        oldtimeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(timeout)
+
         # start the server thread
         self.server = threading.Thread(target=self.server_thread)
         self.server.daemon = True
         self.server.start()
-
-        oldtimeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(timeout)
 
         for node, port in nodelist:
             logging.debug('Connecting to ' + node + ':' + str(port))
@@ -37,7 +37,7 @@ class Network:
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
 
-        socket.setdefaulttimeout(oldtimeout)
+        # socket.setdefaulttimeout(oldtimeout)
 
 
     def server_thread(self):
