@@ -18,10 +18,12 @@ def main(stdscr):
 
     ci.add_message("Welcome to ECE428 Chat App!")
     ci.add_message('Type "/quit" to exit')
+    ci.add_message('Beginning connecting to other nodes, may take a while...')
     ci.add_message('')
 
     network = Network(nodelist)
-    network.send_hello()
+    # network.send_hello()
+    ci.add_message('Finished!')
 
     while True:
         instr = ci.get_input(prompt='> ')

@@ -41,6 +41,7 @@ class ChatInterface:
             elif inch == ord('\n'):
                 message = ''.join(self.chatbuffer[1:])
                 del self.chatbuffer[:]
+                self.redraw_chatbox()
                 return message
             elif xpos >= self.win_chatbox.getmaxyx()[1] - 2:
                 continue

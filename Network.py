@@ -3,6 +3,7 @@ from __future__ import print_function
 import logging
 import socket
 import sys
+import threading
 
 class Network:
     PORT = 1337
@@ -13,7 +14,9 @@ class Network:
         self.nodelist = nodelist
         self.alive = {}
 
+        oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
+
         for node, port in nodelist:
             logging.debug('Connecting to ' + node + ':' + str(port))
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,24 +31,26 @@ class Network:
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
 
+        socket.setdefaulttimeout(oldtimeout)
+
         # start the server thread
-        server = threading.Thread(target=self.server_thread)
-        server.start()
+        self.server = threading.Thread(target=self.server_thread)
+        self.server.start()
 
 
     def server_thread(self):
         ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ss.bind((socket.gethostname(), Network.PORT))
+        ss.bind(('', Network.PORT))
         ss.listen(10)
         logging.debug('Starting server...')
         while True:
             clientsocket, addr = ss.accept()
-            logging.debug('Got connection from ' + addr)
-            self.alive[socket.gethostbyname(addr)] = [clientsocket, None]
+            ip, port = addr
+            logging.debug('Got connection from ' + ip)
+            self.alive[socket.gethostbyname(addr[0])] = [clientsocket, port]
 
 
-    def send_hello(self):
-        msg = 'HELLO'
+    def send_msg(self, msg):
         for host in self.alive.keys():
             totalsent = 0
             while totalsent < len(msg):
@@ -57,5 +62,5 @@ class Network:
 
 
     def close(self):
-        for host in self.alive:
-            host[0].close()
+        for host in self.alive.keys():
+            self.alive[host][0].close()
