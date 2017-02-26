@@ -11,7 +11,7 @@ import uuid
 class Network:
     PORT = 13337
 
-    def __init__(self, nodelist, timeout=1):
+    def __init__(self, nodelist, ci, timeout=1):
         logging.basicConfig(filename='network.log',level=logging.DEBUG)
 
         self.nodelist = nodelist
@@ -24,7 +24,7 @@ class Network:
         socket.setdefaulttimeout(timeout)
 
         # start the server thread
-        self.server = threading.Thread(target=self.server_thread)
+        self.server = threading.Thread(target=self.server_thread, args=(ci,))
         self.server.daemon = True
         self.server.start()
 
@@ -48,7 +48,7 @@ class Network:
         # socket.setdefaulttimeout(oldtimeout)
 
 
-    def server_thread(self):
+    def server_thread(self, ci):
         ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ss.bind(('', Network.PORT))
         ss.listen(10)
@@ -62,6 +62,11 @@ class Network:
                 ip, port = addr
                 logging.debug('Got connection from ' + ip)
                 self.alive[ip] = [clientsocket, port]
+
+                # start the receiver thread for this new connection
+                receiver = threading.Thread(target=self.recv_msg, args=(ip, ci.add_message))
+                receiver.daemon = True
+                receiver.start()
 
 
     def bcast_msg(self, msg):
@@ -99,19 +104,24 @@ class Network:
             totalsent += sent
 
 
-    def recv_msgs(self):
-        msgs = []
-
-        for host in self.alive.keys():
+    def recv_msg(self, host, callback):
+        while True:
             try:
                 jsonmsg = self.alive[host][0].recv(512)
+                if not jsonmsg:
+                    time.sleep(1)
+                    continue
+
                 jsonrecv = json.loads(jsonmsg)
+                callback(jsonrecv['message'])
 
-                msgs.append(jsonrecv['message'])
             except socket.timeout:
-                pass
+                # lost connection
+                logging.debug('Oops, lost connection!')
+                del self.alive[host]
+                break
 
-        return msgs
+            time.sleep(0.5)
 
 
     def close(self):

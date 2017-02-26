@@ -27,12 +27,12 @@ def main(stdscr):
     ci.add_message('Connected to: ' + str(network.alive.keys()))
     ci.add_message('')
 
-    receiver = threading.Thread(target=recv_thread, args=(network, ci))
-    receiver.daemon = True
-    receiver.start()
+    start_recv_threads(network, ci)
 
     while True:
         instr = ci.get_input(prompt=username + ' > ')
+        if not instr:
+            continue
         if instr == '/quit':
             network.close()
             break
@@ -43,12 +43,11 @@ def main(stdscr):
         network.bcast_msg(username + ': ' + instr + '\n')
 
 
-def recv_thread(network, ci):
-    while True:
-        msgs = network.recv_msgs()
-        for msg in msgs:
-            if msg:
-                ci.add_message(msg)
+def start_recv_threads(network, ci):
+    for host in self.alive.keys():
+        receiver = threading.Thread(target=network.recv_msg, args=(host, ci.add_message))
+        receiver.daemon = True
+        receiver.start()
 
 
 if __name__ == '__main__':
