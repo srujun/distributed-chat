@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import json
 import logging
+import pickle
 import socket
 import sys
 import threading
@@ -11,10 +12,11 @@ import uuid
 class Network:
     PORT = 13337
 
-    def __init__(self, nodelist, ci, timeout=1):
+    def __init__(self, nodelist, disp_func, timeout=1):
         logging.basicConfig(filename='network.log',level=logging.DEBUG)
 
         self.nodelist = nodelist
+        # map from host ip (str) -> [socket, port]
         self.alive = {}
 
         # counter used for ISIS ordering
@@ -22,6 +24,8 @@ class Network:
 
         oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
+
+        self.disp_func = disp_func
 
         # start the server thread
         self.server = threading.Thread(target=self.server_thread, args=(ci,))
@@ -63,23 +67,24 @@ class Network:
                 logging.debug('Got connection from ' + ip)
                 self.alive[ip] = [clientsocket, port]
 
-                # start the receiver thread for this new connection
-                receiver = threading.Thread(target=self.recv_msg, args=(ip, ci.add_message))
-                receiver.daemon = True
-                receiver.start()
+                self.start_receivers(ci.add_message, [ip])
+
+
+    def start_receivers(self, receivers=[]):
+        if len(receivers) == 0:
+            receivers = self.alive.keys()
+
+        for host in receivers:
+            receiver = threading.Thread(target=self.recv_msg,
+                                        args=(host, self.disp_func))
+            receiver.daemon = True
+            receiver.start()
 
 
     def bcast_msg(self, msg):
-        jsonsend = {
-            'message': msg,
-            'counter': None,
-            'msgid': uuid.uuid1().hex
-        }
-        jsonmsg = json.dumps(jsonsend)
-
         threads = []
         for host in self.alive.keys():
-            t = threading.Thread(target=self.send_msg, args=(jsonmsg, host))
+            t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
             t.start()
 
@@ -88,11 +93,14 @@ class Network:
 
 
     def send_msg(self, msg, host):
-        logging.debug('Sending "' + msg + '" to ' + host)
+        logging.debug('Sending to {}: {}'.format(host, str(msg)))
+
+        pickled = pickle.dumps(msg)
+
         totalsent = 0
-        while totalsent < len(msg):
+        while totalsent < len(pickled):
             try:
-                sent = self.alive[host][0].send(msg[totalsent:])
+                sent = self.alive[host][0].send(pickled[totalsent:])
             except socket.error:
                 del self.alive[host]
                 logging.debug(host + ' went offline...')
@@ -107,14 +115,19 @@ class Network:
     def recv_msg(self, host, callback):
         while True:
             try:
-                jsonmsg = self.alive[host][0].recv(512)
-                if not jsonmsg:
+                pickled = self.alive[host][0].recv(512)
+                if not pickled:
+                    # TODO: show offline at the right time
                     callback(host + " went offline...")
                     del self.alive[host]
                     break
 
-                jsonrecv = json.loads(jsonmsg)
-                callback(jsonrecv['message'])
+                message = pickle.loads(pickled)
+                if type(message) is not Message:
+                    logging.warning('Unpickling received msg unsuccessful: ' + \
+                                    pickled)
+                else:
+                    callback(message)
                 time.sleep(0.5)
 
             except socket.timeout:
@@ -125,3 +138,23 @@ class Network:
     def close(self):
         for host in self.alive.keys():
             self.alive[host][0].close()
+
+
+class Message:
+    # msgtype can be one of "chat", "proposal", "final"
+    CHAT = "chat"
+    PROPOSAL = "proposal"
+    FINAL = "final"
+
+    def __init__(self, msgtype, msgid=None, text='', username='', proposed=-1, final=-1):
+        self.msgtype = msgtype
+        if not msgid:
+            self.msgid = uuid.uuid1()
+        else:
+            self.msgid = msgid
+        self.text = text
+        self.username = username
+        self.proposed = proposed
+        self.final = final
+
+        # raise TypeError('Message type unknown' + str(msgtype))

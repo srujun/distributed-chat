@@ -22,12 +22,12 @@ def main(stdscr):
     ci.add_message('Type "/quit" to exit')
     ci.add_message('Type "/ask" to see who\'s online')
 
-    network = Network(nodelist, ci)
+    network = Network(nodelist, ci.add_message)
     # network.send_hello()
     ci.add_message('Connected to: ' + str(network.alive.keys()))
     ci.add_message('')
 
-    start_recv_threads(network, ci)
+    network.start_receivers()
 
     while True:
         instr = ci.get_input(prompt=username + ' > ')
@@ -39,15 +39,9 @@ def main(stdscr):
         if instr == '/ask':
             ci.add_message('Online: ' + str(network.alive.keys()))
             continue
+        # TODO: needs to go, only add message when
         ci.add_message(instr, username=username)
         network.bcast_msg(username + ': ' + instr + '\n')
-
-
-def start_recv_threads(network, ci):
-    for host in network.alive.keys():
-        receiver = threading.Thread(target=network.recv_msg, args=(host, ci.add_message))
-        receiver.daemon = True
-        receiver.start()
 
 
 if __name__ == '__main__':

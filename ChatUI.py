@@ -1,4 +1,5 @@
 import curses
+from Network import Message
 
 class ChatInterface:
     def __init__(self, stdscr, chatbox_lines=2):
@@ -51,10 +52,23 @@ class ChatInterface:
             self.redraw_chatbox()
 
     def add_message(self, message, username=''):
-        if not message.endswith('\n'):
-            message = message + '\n'
+        if type(message) is str:
+            if not message.endswith('\n'):
+                message = message + '\n'
 
-        if username:
-            username = username + ": "
-        self.win_messages.addstr(username + message)
-        self.win_messages.refresh()
+            if username:
+                username = username + ": "
+            self.win_messages.addstr(username + message)
+            self.win_messages.refresh()
+
+        elif type(message) is Message and message.type == Message.CHAT:
+            msgtext = ''
+
+            if not message.text.endswith('\n'):
+                msgtext = message.text + '\n'
+
+            if message.username:
+                msgtext = username + ": " + msgtext
+
+            self.win_messages.addstr(msgtext)
+            self.win_messages.refresh()
