@@ -70,10 +70,12 @@ class ChatInterface:
                 msgtext = message.text + '\n'
 
             if message.username:
+                msgtext = message.username + ": " + msgtext
+            else:
                 msgtext = username + ": " + msgtext
 
             self.win_messages.addstr(msgtext)
             self.win_messages.refresh()
 
         else:
-            logging.error('Msg is broken: ' + str(type(message)) + ' ' + str(message))
+            logging.error('Msg is broken: ' + str(message))
