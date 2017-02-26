@@ -76,4 +76,4 @@ class ChatInterface:
             self.win_messages.refresh()
 
         else:
-            logging.error("Msg is broken: " + str(message))
+            logging.error("Msg is broken: " + type(message) + " " + str(message))

@@ -36,6 +36,7 @@ def main(stdscr):
             continue
         if instr == '/quit':
             network.close()
+            logging.log('Going offline. Bye!')
             break
         if instr == '/ask':
             ci.add_message('Online: ' + str(network.alive.keys()))

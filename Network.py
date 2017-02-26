@@ -160,5 +160,5 @@ class Message:
         # raise TypeError('Message type unknown' + str(msgtype))
 
     def __repr__(self):
-        return 'Message(id={}, username={}, text={})'.format(self.msgid, \
-                self.username, self.text)
+        return 'Message(type={}, id={}, username={}, text={})'.format(
+            self.msgtype, self.msgid, self.username, self.text)
