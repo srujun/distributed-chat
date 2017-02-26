@@ -99,7 +99,7 @@ class Network:
                 break
             if sent == 0:
                 # lost connection
-                logging.debug('Oops, lost connection!')
+                logging.debug('Could not send msg, lost connection!')
                 del self.alive[host]
             totalsent += sent
 
