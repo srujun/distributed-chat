@@ -48,5 +48,5 @@ def main(stdscr):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='app.log',level=logging.DEBUG)
+    logging.basicConfig(filename='app.log', level=logging.DEBUG)
     curses.wrapper(main)

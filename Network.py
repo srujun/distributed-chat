@@ -125,8 +125,7 @@ class Network:
 
                 message = pickle.loads(pickled)
                 if type(message) is not Message:
-                    logging.warning('Unpickling received msg unsuccessful: ' + \
-                                    pickled)
+                    logging.warning('Unpickling received msg unsuccessful ' + type(message))
                 else:
                     callback(message)
                 time.sleep(0.5)
@@ -159,3 +158,7 @@ class Message:
         self.final = final
 
         # raise TypeError('Message type unknown' + str(msgtype))
+
+    def __repr__(self):
+        return 'Message(id={}, username={}, text={})'.format(self.msgid, \
+                self.username, self.text)
