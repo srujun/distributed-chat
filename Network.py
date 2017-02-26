@@ -28,7 +28,7 @@ class Network:
         self.disp_func = disp_func
 
         # start the server thread
-        self.server = threading.Thread(target=self.server_thread, args=(ci,))
+        self.server = threading.Thread(target=self.server_thread)
         self.server.daemon = True
         self.server.start()
 
@@ -46,13 +46,14 @@ class Network:
             else:
                 logging.debug('Connection successful!')
                 self.alive[socket.gethostbyname(node)] = [sock, port]
+
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
 
         # socket.setdefaulttimeout(oldtimeout)
 
 
-    def server_thread(self, ci):
+    def server_thread(self):
         ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ss.bind(('', Network.PORT))
         ss.listen(10)
@@ -67,7 +68,7 @@ class Network:
                 logging.debug('Got connection from ' + ip)
                 self.alive[ip] = [clientsocket, port]
 
-                self.start_receivers(ci.add_message, [ip])
+                self.start_receivers(receivers=[ip])
 
 
     def start_receivers(self, receivers=[]):
