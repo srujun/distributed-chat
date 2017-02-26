@@ -44,7 +44,7 @@ def main(stdscr):
 
 
 def start_recv_threads(network, ci):
-    for host in self.alive.keys():
+    for host in network.alive.keys():
         receiver = threading.Thread(target=network.recv_msg, args=(host, ci.add_message))
         receiver.daemon = True
         receiver.start()
