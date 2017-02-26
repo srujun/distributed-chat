@@ -109,8 +109,9 @@ class Network:
             try:
                 jsonmsg = self.alive[host][0].recv(512)
                 if not jsonmsg:
-                    time.sleep(1)
-                    continue
+                    callback(host + " went offline...")
+                    del self.alive[host]
+                    break
 
                 jsonrecv = json.loads(jsonmsg)
                 callback(jsonrecv['message'])
