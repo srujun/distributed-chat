@@ -1,4 +1,6 @@
 import curses
+import logging
+
 from Network import Message
 
 class ChatInterface:
@@ -72,3 +74,6 @@ class ChatInterface:
 
             self.win_messages.addstr(msgtext)
             self.win_messages.refresh()
+
+        else:
+            logging.error("Msg is broken: " + str(message))

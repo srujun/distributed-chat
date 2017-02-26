@@ -13,7 +13,7 @@ class Network:
     PORT = 13337
 
     def __init__(self, nodelist, disp_func, timeout=1):
-        logging.basicConfig(filename='network.log',level=logging.DEBUG)
+        # logging.basicConfig(filename='network.log',level=logging.DEBUG)
 
         self.nodelist = nodelist
         # map from host ip (str) -> [socket, port]

@@ -1,8 +1,9 @@
 import curses
+import logging
 import threading
 
 from ChatUI import ChatInterface
-from Network import Network
+from Network import Network, Message
 
 def main(stdscr):
     # get list of nodes
@@ -39,10 +40,13 @@ def main(stdscr):
         if instr == '/ask':
             ci.add_message('Online: ' + str(network.alive.keys()))
             continue
+
+        message = Message(Message.CHAT, text=instr, username=username)
         # TODO: needs to go, only add message when
-        ci.add_message(instr, username=username)
-        network.bcast_msg(username + ': ' + instr + '\n')
+        ci.add_message(message)
+        network.bcast_msg(message)
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='app.log',level=logging.DEBUG)
     curses.wrapper(main)
