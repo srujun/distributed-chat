@@ -114,14 +114,11 @@ class Network:
 
                 jsonrecv = json.loads(jsonmsg)
                 callback(jsonrecv['message'])
+                time.sleep(0.5)
 
             except socket.timeout:
-                # lost connection
-                logging.debug('Oops, lost connection!')
-                del self.alive[host]
-                break
-
-            time.sleep(0.5)
+                time.sleep(1)
+                continue
 
 
     def close(self):
