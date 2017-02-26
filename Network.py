@@ -1,10 +1,12 @@
 from __future__ import print_function
 
+import json
 import logging
 import socket
 import sys
 import threading
 import time
+import uuid
 
 class Network:
     PORT = 13337
@@ -14,6 +16,9 @@ class Network:
 
         self.nodelist = nodelist
         self.alive = {}
+
+        # counter used for ISIS ordering
+        self.counter = 0
 
         oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
@@ -60,9 +65,16 @@ class Network:
 
 
     def bcast_msg(self, msg):
+        jsonsend = {
+            'message': msg,
+            'counter': None,
+            'msgid': uuid.uuid1().hex
+        }i
+        jsonmsg = json.dumps(jsonsend)
+
         threads = []
         for host in self.alive.keys():
-            t = threading.Thread(target=self.send_msg, args=(msg, host))
+            t = threading.Thread(target=self.send_msg, args=(jsonmsg, host))
             threads.append(t)
             t.start()
 
@@ -70,7 +82,7 @@ class Network:
             thread.join()
 
 
-    def send_msg(self, msg, host):
+    def send_msg(self, msg, msgid, host):
         logging.debug('Sending "' + msg + '" to ' + host)
         totalsent = 0
         while totalsent < len(msg):
@@ -92,7 +104,10 @@ class Network:
 
         for host in self.alive.keys():
             try:
-                msgs.append(self.alive[host][0].recv(512))
+                jsonmsg = self.alive[host][0].recv(512)
+                jsonrecv = json.loads(jsonmsg)
+
+                msgs.append(jsonrecv['message'])
             except socket.timeout:
                 pass
 
