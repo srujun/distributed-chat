@@ -63,7 +63,7 @@ class ChatInterface:
             self.win_messages.addstr(username + message)
             self.win_messages.refresh()
 
-        elif type(message) is Message and message.type == Message.CHAT:
+        elif type(message) is Message and message.msgtype == Message.CHAT:
             msgtext = ''
 
             if not message.text.endswith('\n'):
