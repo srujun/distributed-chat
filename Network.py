@@ -82,7 +82,7 @@ class Network:
             thread.join()
 
 
-    def send_msg(self, msg, msgid, host):
+    def send_msg(self, msg, host):
         logging.debug('Sending "' + msg + '" to ' + host)
         totalsent = 0
         while totalsent < len(msg):
@@ -105,9 +105,9 @@ class Network:
         for host in self.alive.keys():
             try:
                 jsonmsg = self.alive[host][0].recv(512)
-                jsonrecv = json.loads(jsonmsg)
+                #jsonrecv = json.loads(jsonmsg)
 
-                msgs.append(jsonrecv['message'])
+                msgs.append(jsonmsg) # jsonrecv['message'])
             except socket.timeout:
                 pass
 
