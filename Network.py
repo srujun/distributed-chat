@@ -105,9 +105,9 @@ class Network:
         for host in self.alive.keys():
             try:
                 jsonmsg = self.alive[host][0].recv(512)
-                #jsonrecv = json.loads(jsonmsg)
+                jsonrecv = json.loads(jsonmsg)
 
-                msgs.append(jsonmsg) # jsonrecv['message'])
+                msgs.append(jsonrecv['message'])
             except socket.timeout:
                 pass
 
