@@ -69,7 +69,7 @@ class Network:
             'message': msg,
             'counter': None,
             'msgid': uuid.uuid1().hex
-        }i
+        }
         jsonmsg = json.dumps(jsonsend)
 
         threads = []
