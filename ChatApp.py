@@ -22,7 +22,7 @@ def main(stdscr):
     ci.add_message('Type "/quit" to exit')
     ci.add_message('Type "/ask" to see who\'s online')
 
-    network = Network(nodelist)
+    network = Network(nodelist, ci)
     # network.send_hello()
     ci.add_message('Connected to: ' + str(network.alive.keys()))
     ci.add_message('')
