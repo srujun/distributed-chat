@@ -124,8 +124,8 @@ class Network:
                     break
 
                 message = pickle.loads(pickled)
-                if type(message) is not Message:
-                    logging.warning('Unpickling received msg unsuccessful ' + type(message))
+                if not isinstance(message, Message):
+                    logging.warning('Unpickling received msg unsuccessful ' + str(type(message)))
                 else:
                     callback(message)
                 time.sleep(0.5)

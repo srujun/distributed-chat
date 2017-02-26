@@ -43,6 +43,7 @@ def main(stdscr):
             continue
 
         message = Message(Message.CHAT, text=instr, username=username)
+
         # TODO: needs to go, only add message when
         ci.add_message(message)
         network.bcast_msg(message)
