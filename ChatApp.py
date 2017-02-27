@@ -24,6 +24,8 @@ def main(stdscr):
     ci.add_message('Type "/ask" to see who\'s online')
 
     network = Network(nodelist, ci.add_message)
+    ip = Network.get_ip()
+
     # network.send_hello()
     ci.add_message('Connected to: ' + str(network.alive.keys()))
     ci.add_message('')
@@ -42,7 +44,7 @@ def main(stdscr):
             ci.add_message('Online: ' + str(network.alive.keys()))
             continue
 
-        message = Message(Message.CHAT, text=instr, username=username)
+        message = Message(Message.CHAT, ip, text=instr, username=username)
 
         # TODO: needs to go, only add message when
         ci.add_message(message)

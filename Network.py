@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import json
 import logging
+from operator import add
 import pickle
 import socket
 import sys
@@ -21,6 +22,11 @@ class Network:
 
         # counter used for ISIS ordering
         self.counter = 0
+        # message queue for ISIS ordering
+        self.msgqueue = []
+        # unique identifier for appending to each priority number
+        # it is the sum of the digitis of the IP address
+        self.uid = reduce(add, map(int, self.get_ip().split('.')))
 
         oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
@@ -53,6 +59,14 @@ class Network:
         # socket.setdefaulttimeout(oldtimeout)
 
 
+    def get_ip():
+        return socket.gethostbyname(socket.gethostname())
+
+
+    def merge_float(num1, num2):
+        return float('{}.{}'.format(num1, num2))
+
+
     def server_thread(self):
         ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ss.bind(('', Network.PORT))
@@ -77,20 +91,25 @@ class Network:
 
         for host in receivers:
             receiver = threading.Thread(target=self.recv_msg,
-                                        args=(host, self.disp_func))
+                                        args=(host, self.handle_message))
             receiver.daemon = True
             receiver.start()
 
 
-    def bcast_msg(self, msg):
+    def bcast_msg(self, msg, destinations=[], wait=True):
         threads = []
-        for host in self.alive.keys():
+
+        if len(destinations) == 0:
+            destinations = self.alive.keys()
+
+        for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
             t.start()
 
-        for thread in threads:
-            thread.join()
+        if wait:
+            for thread in threads:
+                thread.join()
 
 
     def send_msg(self, msg, host):
@@ -125,7 +144,8 @@ class Network:
 
                 message = pickle.loads(pickled)
                 if not isinstance(message, Message):
-                    logging.warning('Unpickling received msg unsuccessful ' + str(type(message)))
+                    logging.warning('Unpickling received msg unsuccessful ' + \
+                                    str(type(message)))
                 else:
                     callback(message)
                 time.sleep(0.5)
@@ -133,6 +153,29 @@ class Network:
             except socket.timeout:
                 time.sleep(1)
                 continue
+
+
+    def handle_message(self, message):
+        logging.debug('Got message: {}'.format(message))
+
+        # need to respond with a proposed priority
+        if message.msgtype == Message.CHAT and
+                (message.proposed < 0 and message.final < 0):
+            proposal = Message(Message.PROPOSAL, Network.get_ip(),
+                               msgid=message.msgid)
+            self.counter += 1
+            proposal.proposed = merge_float(self.counter, self.uid)
+
+            # store msg in queue with the proposed priority
+            message.final = proposal.proposed
+            message.deliverable = False
+            self.msgqueue.append(message)
+            self.msgqueue.sort(key=lambda m: m.final, reverse=True)
+
+            self.bcast_msg(proposal, destinations=[message.origin], wait=False)
+
+        elif message.msgtype == Message.PROPOSAL:
+            logging.debug('Queue: {}'.format(self.msgqueue))
 
 
     def close(self):
@@ -146,7 +189,7 @@ class Message:
     PROPOSAL = "proposal"
     FINAL = "final"
 
-    def __init__(self, msgtype, msgid=None, text='', username='', proposed=-1, final=-1):
+    def __init__(self, msgtype, origin, msgid=None, text='', username=''):
         self.msgtype = msgtype
         if not msgid:
             self.msgid = uuid.uuid1()
@@ -154,11 +197,19 @@ class Message:
             self.msgid = msgid
         self.text = text
         self.username = username
-        self.proposed = proposed
-        self.final = final
+
+        self.origin = ''
+
+        self.proposed = -1
+        self.final = -1
+
+        self.deliverable = False
 
         # raise TypeError('Message type unknown' + str(msgtype))
 
     def __repr__(self):
-        return 'Message(type={}, id={}, username="{}", text="{}")'.format(
-            self.msgtype, self.msgid, self.username, self.text)
+        fmt = 'Message(type={}, origin={}, id={}, username="{}", text="{}", '
+              'proposed={}, final={}, deliverable={})'
+        return fmt.format(
+            self.msgtype, self.origin, self.msgid, self.username, self.text,
+            self.proposed, self.final, self.deliverable)
