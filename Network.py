@@ -159,7 +159,7 @@ class Network:
         logging.debug('Got message: {}'.format(message))
 
         # need to respond with a proposed priority
-        if message.msgtype == Message.CHAT and
+        if message.msgtype == Message.CHAT and \
                 (message.proposed < 0 and message.final < 0):
             proposal = Message(Message.PROPOSAL, Network.get_ip(),
                                msgid=message.msgid)
