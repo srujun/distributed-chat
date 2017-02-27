@@ -46,8 +46,8 @@ def main(stdscr):
 
         message = Message(Message.CHAT, ip, text=instr, username=username)
 
-        # TODO: needs to go, only add message when
-        ci.add_message(message)
+        # TODO: needs to go, only add message after ISIS protocol
+        # ci.add_message(message)
         network.bcast_msg(message)
 
 

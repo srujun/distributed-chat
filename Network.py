@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import json
+import copy
 import logging
 from operator import add
 import pickle
@@ -104,6 +104,16 @@ class Network:
         if len(destinations) == 0:
             destinations = self.alive.keys()
 
+        # add msg to msgqueue if it is a new chat message
+        if message.msgtype == Message.CHAT:
+            qmsg = copy.deepcopy(message)
+            self.counter += 1
+            qmsg.final = Network.merge_float(self.counter, self.uid)
+            qmsg.deliverable = False
+            self.msgqueue.append(qmsg)
+            self.msgqueue.sort(key=lambda m: m.final)
+            logging.debug('Queue: {}'.format(self.msgqueue))
+
         for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
@@ -124,6 +134,8 @@ class Network:
             try:
                 sent = self.alive[host][0].send(pickled[totalsent:])
             except socket.error:
+                # TODO: show offline at the right time
+                callback(host + " went offline...")
                 del self.alive[host]
                 logging.debug(host + ' went offline...')
                 break
@@ -142,6 +154,7 @@ class Network:
                     # TODO: show offline at the right time
                     callback(host + " went offline...")
                     del self.alive[host]
+                    logging.debug(host + ' went offline...')
                     break
 
                 message = pickle.loads(pickled)
@@ -158,7 +171,7 @@ class Network:
 
 
     def handle_message(self, message):
-        logging.debug('Got message: {}'.format(message))
+        logging.debug('Handle message: {}'.format(message))
 
         # normal string display
         if isinstance(message, str):
@@ -179,13 +192,38 @@ class Network:
             message.deliverable = False
             self.msgqueue.append(message)
             self.msgqueue.sort(key=lambda m: m.final)
-            logging.debug('Queue: {}'.format(self.msgqueue))
+            logging.debug('Got NEW msg. Queue: {}'.format(self.msgqueue))
 
             self.bcast_msg(proposal, destinations=[message.origin], wait=False)
 
         # wait until we receive proposals from everyone
         elif message.msgtype == Message.PROPOSAL:
-            logging.debug('Queue: {}'.format([(m.text, m.proposed, m.final) for m in self.msgqueue]))
+            logging.debug('Got proposal')
+
+            # get the original mssage from the queue
+            orig = next(m for m in self.msgqueue if m.msgid = message.msgid)
+            try:
+                orig.proposals.append(message)
+            except AttributeError:
+                orig.proposals = [ message ]
+
+            # if we have received proposals from everyone, mark as deliverable
+            # and remulticast it
+            if len(orig.proposals) == len(self.alive):
+                orig.deliverable = True
+                orig.final = max(orig.proposals, key=lambda m: m.proposed)
+                logging.debug('Marking deliverable!')
+                logging.debug('Queue: {}'.format(self.msgqueue))
+
+                final = Message(Message.FINAL, Network.get_ip(),
+                                msgid=orig.msgid)
+                final.final = orig.final
+                self.bcast_msg(final, wait=False)
+
+        elif message.msgtype == Message.FINAL:
+            logging.debug('Got final')
+
+        # deliver all msgs at start of queue
 
 
     def close(self):
