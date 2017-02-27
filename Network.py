@@ -160,13 +160,17 @@ class Network:
     def handle_message(self, message):
         logging.debug('Got message: {}'.format(message))
 
+        if isinstance(message, str):
+            self.disp_func(message)
+            return
+
         # need to respond with a proposed priority
         if message.msgtype == Message.CHAT and \
                 (message.proposed < 0 and message.final < 0):
             proposal = Message(Message.PROPOSAL, Network.get_ip(),
                                msgid=message.msgid)
             self.counter += 1
-            proposal.proposed = merge_float(self.counter, self.uid)
+            proposal.proposed = Network.merge_float(self.counter, self.uid)
 
             # store msg in queue with the proposed priority
             message.final = proposal.proposed
