@@ -26,7 +26,7 @@ class Network:
         self.msgqueue = []
         # unique identifier for appending to each priority number
         # it is the sum of the digitis of the IP address
-        self.uid = reduce(add, map(int, self.get_ip().split('.')))
+        self.uid = reduce(add, map(int, Network.get_ip().split('.')))
 
         oldtimeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
@@ -59,11 +59,13 @@ class Network:
         # socket.setdefaulttimeout(oldtimeout)
 
 
-    def get_ip():
+    @classmethod
+    def get_ip(cls):
         return socket.gethostbyname(socket.gethostname())
 
 
-    def merge_float(num1, num2):
+    @classmethod
+    def merge_float(cls, num1, num2):
         return float('{}.{}'.format(num1, num2))
 
 
