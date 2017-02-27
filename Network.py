@@ -160,7 +160,9 @@ class Network:
     def handle_message(self, message):
         logging.debug('Got message: {}'.format(message))
 
+        # normal string display
         if isinstance(message, str):
+            logging.debug('Display msg: ' + message)
             self.disp_func(message)
             return
 
@@ -176,13 +178,14 @@ class Network:
             message.final = proposal.proposed
             message.deliverable = False
             self.msgqueue.append(message)
-            self.msgqueue.sort(key=lambda m: m.final, reverse=True)
+            self.msgqueue.sort(key=lambda m: m.final)
+            logging.debug('Queue: {}'.format(self.msgqueue))
 
             self.bcast_msg(proposal, destinations=[message.origin], wait=False)
 
         # wait until we receive proposals from everyone
         elif message.msgtype == Message.PROPOSAL:
-            logging.debug('Queue: {}'.format(self.msgqueue))
+            logging.debug('Queue: {}'.format([(m.text, m.proposed, m.final) for m in self.msgqueue]))
 
 
     def close(self):
