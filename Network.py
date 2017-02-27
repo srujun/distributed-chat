@@ -201,7 +201,7 @@ class Network:
             logging.debug('Got proposal')
 
             # get the original mssage from the queue
-            orig = next(m for m in self.msgqueue if m.msgid = message.msgid)
+            orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
             try:
                 orig.proposals.append(message)
             except AttributeError:
