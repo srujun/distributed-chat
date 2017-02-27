@@ -149,7 +149,7 @@ class Network:
     def recv_msg(self, host, callback):
         while True:
             try:
-                pickled = self.alive[host][0].recv(512)
+                pickled = self.alive[host][0].recv(1024)
                 if not pickled:
                     # TODO: show offline at the right time
                     callback(host + " went offline...")
