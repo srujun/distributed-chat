@@ -208,8 +208,8 @@ class Message:
         # raise TypeError('Message type unknown' + str(msgtype))
 
     def __repr__(self):
-        fmt = 'Message(type={}, origin={}, id={}, username="{}", text="{}", '
-              'proposed={}, final={}, deliverable={})'
+        fmt = ('Message(type={}, origin={}, id={}, username="{}", text="{}", '
+               'proposed={}, final={}, deliverable={})')
         return fmt.format(
             self.msgtype, self.origin, self.msgid, self.username, self.text,
             self.proposed, self.final, self.deliverable)
