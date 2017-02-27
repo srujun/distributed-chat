@@ -180,6 +180,7 @@ class Network:
 
             self.bcast_msg(proposal, destinations=[message.origin], wait=False)
 
+        # wait until we receive proposals from everyone
         elif message.msgtype == Message.PROPOSAL:
             logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -204,7 +205,7 @@ class Message:
         self.text = text
         self.username = username
 
-        self.origin = ''
+        self.origin = origin
 
         self.proposed = -1
         self.final = -1
