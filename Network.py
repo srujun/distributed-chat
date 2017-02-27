@@ -105,8 +105,8 @@ class Network:
             destinations = self.alive.keys()
 
         # add msg to msgqueue if it is a new chat message
-        if message.msgtype == Message.CHAT:
-            qmsg = copy.deepcopy(message)
+        if msg.msgtype == Message.CHAT:
+            qmsg = copy.deepcopy(msg)
             self.counter += 1
             qmsg.final = Network.merge_float(self.counter, self.uid)
             qmsg.deliverable = False
