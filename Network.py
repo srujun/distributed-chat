@@ -377,10 +377,11 @@ class Network:
                 # check if this can be delivered
                 if msg.alive_set & alive_rn == received_proposals:
                     msg.deliverable = True
-                    msg.priority = max(
-                        msg.priority,
-                        max(msg.proposals, key=lambda m: m.priority)
-                    )
+                    if msg.proposals:
+                        msg.priority = max(
+                            msg.priority,
+                            max(msg.proposals, key=lambda m: m.priority)
+                        )
                     logging.debug('Marking deliverable with '
                                   'prio {}!'.format(msg.priority))
                     logging.debug('Queue: {}'.format(self.msgqueue))
