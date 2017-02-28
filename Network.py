@@ -138,7 +138,6 @@ class Network:
 
         if len(destinations) == 0:
             is_all_hosts = True
-            self.alive_mutex.acquire()
             destinations = self.alive.keys()
 
         # add msg to msgqueue if it is a new chat message
@@ -164,11 +163,11 @@ class Network:
 
             logging.debug('Queue: {}'.format(self.msgqueue))
 
+        self.alive_mutex.acquire()
         for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
             t.start()
-
         if is_all_hosts:
             self.alive_mutex.release()
 
@@ -243,9 +242,10 @@ class Network:
             self.queue_mutex.acquire()
             orig = next([m for m in self.msgqueue if m.msgid == message.msgid],
                         None)
+            # TODO: check this release
+            self.queue_mutex.release()
             if orig is None:
                 logging.warning('Bogus proposal. ID: {}'.format(message.msgid))
-                self.queue_mutex.release()
                 return
 
             # add this proposal to the original message's proposals set
@@ -284,10 +284,10 @@ class Network:
                 final = Message(Message.FINAL, Network.get_ip(),
                                 msgid=orig.msgid)
                 final.priority = orig.priority
-                self.queue_mutex.release()
+                # TODO: check self.queue_mutex.release()
                 self.bcast_msg(final, wait=False)
             else:
-                self.queue_mutex.release()
+                # TODO: check self.queue_mutex.release()
 
         # sender has sent final priority
         elif message.msgtype == Message.FINAL:
@@ -317,6 +317,9 @@ class Network:
             logging.debug('Queue: {}'.format(self.msgqueue))
 
             self.queue_mutex.release()
+
+        else:
+            logging.warning('Got unknown msg type!')
 
 
     def handle_crash(self, host):
