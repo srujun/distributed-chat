@@ -296,7 +296,7 @@ class Network:
 
             if orig.alive_set & alive_rn == received_proposals:
                 self.queue_mutex.acquire()
-                propmax = max(orig.proposals, key=lambda m: m.priority)
+                propmax = max(orig.proposals, key=lambda m: m.priority).priority
                 logging.debug('Propmax: {}'.format(propmax))
                 logging.debug('Selfmax: {}'.format(orig.priority))
                 orig.priority = max(orig.priority, propmax)
@@ -395,12 +395,15 @@ class Network:
                 logging.debug('Checking if can be delivered...')
                 # check if this can be delivered
                 if msg.alive_set & alive_rn == received_proposals:
+                    self.queue_mutex.acquire()
+                    propmax = max(msg.proposals, key=lambda m: m.priority).priority
+                    logging.debug('Propmax: {}'.format(propmax))
+                    logging.debug('Selfmax: {}'.format(msg.priority))
+                    msg.priority = max(orig.priority, propmax)
                     msg.deliverable = True
-                    if msg.proposals:
-                        msg.priority = max(
-                            msg.priority,
-                            max(msg.proposals, key=lambda m: m.priority)
-                        )
+                    self.msgqueue.sort(key=lambda m: m.priority)
+                    self.queue_mutex.release()
+
                     logging.debug('Marking deliverable with '
                                   'prio {}!'.format(msg.priority))
                     logging.debug('Queue: {}'.format(self.msgqueue))
