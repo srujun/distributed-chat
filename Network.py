@@ -111,11 +111,9 @@ class Network:
     def recv_msg(self, host, callback):
         while True:
             try:
-                logging.debug('{}: recv acquire alive_mutex'.format(host))
                 self.alive_mutex.acquire()
                 sock = self.alive[host]
                 self.alive_mutex.release()
-                logging.debug('{}: recv release alive_mutex'.format(host))
 
                 pickled = sock.recv(2048)
                 if not pickled:
@@ -187,11 +185,9 @@ class Network:
         pickled = cPickle.dumps(msg)
         totalsent = 0
 
-        logging.debug('{} send acquire alive_mutex'.format(host))
         self.alive_mutex.acquire()
         sock = self.alive[host]
         self.alive_mutex.release()
-        logging.debug('{} send release alive_mutex'.format(host))
 
         while totalsent < len(pickled):
             try:
