@@ -198,6 +198,7 @@ class Network:
 
     def send_msg(self, msg, host):
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
+        logging.info('SEND time={}, msg={}'.format(time.time(), msg))
 
         pickled = cPickle.dumps(msg, cPickle.HIGHEST_PROTOCOL)
         totalsent = 0
@@ -230,6 +231,7 @@ class Network:
 
     def handle_message(self, message):
         logging.debug('Handle message: {}'.format(message))
+        logging.info('HANDLE time={}, msg={}'.format(time.time(), msg))
 
         # normal string display
         if isinstance(message, str):

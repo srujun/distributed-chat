@@ -1,5 +1,6 @@
 import curses
 import logging
+import sys
 import threading
 
 from ChatUI import ChatInterface
@@ -56,7 +57,12 @@ def main(stdscr):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='app.log', level=logging.DEBUG)
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'INFO':
+            logging.basicConfig(filename='app.log', level=logging.INFO)
+    else:
+        logging.basicConfig(filename='app.log', level=logging.DEBUG)
+
     logging.info('============================')
     logging.info('==== Welcome to ChatApp ====')
     logging.info('============================')
