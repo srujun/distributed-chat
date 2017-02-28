@@ -3,7 +3,7 @@ from __future__ import print_function
 import copy
 import logging
 from operator import add
-import pickle
+import cPickle
 import socket
 import sys
 import threading
@@ -122,7 +122,7 @@ class Network:
                     self.handle_crash(host)
                     break
 
-                message = pickle.loads(pickled)
+                message = cPickle.loads(pickled)
                 if not isinstance(message, Message):
                     logging.warning('Unpickling received msg unsuccessful')
                 else:
@@ -184,7 +184,7 @@ class Network:
     def send_msg(self, msg, host):
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
 
-        pickled = pickle.dumps(msg)
+        pickled = cPickle.dumps(msg)
         logging.debug('Pickled!')
         totalsent = 0
 
