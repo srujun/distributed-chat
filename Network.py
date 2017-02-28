@@ -17,6 +17,7 @@ class Network:
         # logging.basicConfig(filename='network.log',level=logging.DEBUG)
 
         self.nodelist = nodelist
+
         # map from host ip (str) -> socket
         self.alive = {}
         self.alive_mutex = threading.RLock()
@@ -64,6 +65,11 @@ class Network:
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
 
+        # start the delivery thread
+        self.delivery = threading.Thread(target=self.do_delivery)
+        self.delivery.daemon = True
+        self.delivery.start()
+
         # socket.setdefaulttimeout(oldtimeout)
 
 
@@ -90,6 +96,7 @@ class Network:
             else:
                 ip, port = addr
                 logging.debug('Got connection from ' + ip)
+                self.disp_func('{} has come online!'.format(ip))
 
                 self.alive_mutex.acquire()
                 self.alive[ip] = clientsocket
@@ -387,6 +394,22 @@ class Network:
                     self.queue_mutex.acquire()
 
         self.queue_mutex.release()
+        self.disp_func('{} is now offline...'.format(host))
+
+
+    def do_delivery(self):
+        while True:
+            time.sleep(0.5)
+            self.queue_mutex.acquire()
+            for i, msg in enumerate(self.msgqueue):
+                if msg.deliverable:
+                    logging.debug('Delivering msg {}'.format(msg))
+                    del self.msgqueue[i]
+                    self.disp_func(msg)
+                else:
+                    # break as soon as we see a non-deliverable message
+                    break
+            self.queue_mutex.release()
 
 
     def close(self):
