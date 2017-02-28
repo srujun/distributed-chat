@@ -288,6 +288,7 @@ class Network:
                 self.bcast_msg(final, wait=False)
             else:
                 # TODO: check self.queue_mutex.release()
+                pass
 
         # sender has sent final priority
         elif message.msgtype == Message.FINAL:
