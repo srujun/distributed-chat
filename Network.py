@@ -199,6 +199,7 @@ class Network:
                 break
 
             totalsent += sent
+        logging.debug('Msg send successfully')
 
 
     def handle_message(self, message):
@@ -319,7 +320,7 @@ class Network:
 
 
     def handle_crash(self, host):
-        logging.debug('{} crashed!'.format(crashed))
+        logging.debug('{} crashed!'.format(host))
         logging.debug('Removing crashed node from alive list')
         self.alive_mutex.acquire()
         # remove crashed node from alive list
