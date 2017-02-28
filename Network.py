@@ -120,7 +120,11 @@ class Network:
         while True:
             try:
                 self.alive_mutex.acquire()
-                sock = self.alive[host]
+                try:
+                    sock = self.alive[host]
+                except KeyError:
+                    self.alive_mutex.release()
+                    break
                 self.alive_mutex.release()
 
                 pickled = sock.recv(2048)
