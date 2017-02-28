@@ -165,16 +165,16 @@ class Network:
 
             logging.debug('Queue: {}'.format(self.msgqueue))
 
-        # if is_all_hosts:
-        #     logging.debug('bcast acquire alive_mutex')
-        #     self.alive_mutex.acquire()
+        if is_all_hosts:
+            logging.debug('bcast acquire alive_mutex')
+            self.alive_mutex.acquire()
         for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
             t.start()
-        # if is_all_hosts:
-        #     self.alive_mutex.release()
-        #     logging.debug('bcast release alive_mutex')
+        if is_all_hosts:
+            self.alive_mutex.release()
+            logging.debug('bcast release alive_mutex')
 
         if wait:
             for thread in threads:
@@ -185,7 +185,6 @@ class Network:
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
 
         pickled = cPickle.dumps(msg)
-        logging.debug('Pickled!')
         totalsent = 0
 
         logging.debug('{} send acquire alive_mutex'.format(host))
@@ -207,7 +206,7 @@ class Network:
                 break
 
             totalsent += sent
-        logging.debug('Msg send successfully')
+        logging.debug('Msg send successful')
 
 
     def handle_message(self, message):
@@ -249,13 +248,16 @@ class Network:
 
             # get the original msg from the queue
             self.queue_mutex.acquire()
-            orig = next([m for m in self.msgqueue if m.msgid == message.msgid],
-                        None)
-            # TODO: check this release
-            self.queue_mutex.release()
-            if orig is None:
+            try:
+                orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
+            except StopIteration:
+                # TODO: check this release
+                self.queue_mutex.release()
                 logging.warning('Bogus proposal. ID: {}'.format(message.msgid))
                 return
+
+            # TODO: check this release
+            self.queue_mutex.release()
 
             # add this proposal to the original message's proposals set
             orig.proposals_mutex.acquire()
@@ -305,12 +307,16 @@ class Network:
 
             # get the original msg from the queue
             self.queue_mutex.acquire()
-            orig = next([m for m in self.msgqueue if m.msgid == message.msgid],
-                        None)
-            if orig is None:
-                logging.warning('Bogus final. ID: {}'.format(message.msgid))
+            try:
+                orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
+            except StopIteration:
+                # TODO: check this release
                 self.queue_mutex.release()
+                logging.warning('Bogus proposal. ID: {}'.format(message.msgid))
                 return
+
+            # TODO: check this release
+            self.queue_mutex.release()
 
             # update msg final priority
             orig.priority = message.priority
