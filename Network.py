@@ -29,7 +29,7 @@ class Network:
 
         # message queue for ISIS ordering
         self.msgqueue = []
-        self.queue_mutex = threading.RLock()
+        self.queue_mutex = threading.Lock()
 
         # unique identifier for appending to each priority number
         # it is the sum of the digitis of the IP address
