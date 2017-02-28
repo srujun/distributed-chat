@@ -424,16 +424,18 @@ class Network:
         while True:
             time.sleep(0.5)
             self.queue_mutex.acquire()
-            self.msgqueue.sort(key=lambda m: m.priority)
-            logging.debug('Sorted Queue: {}'.format(self.msgqueue))
-            for i, msg in enumerate(self.msgqueue):
-                if msg.deliverable:
-                    logging.debug('Delivering msg {}'.format(msg))
-                    del self.msgqueue[i]
-                    self.disp_func(msg)
-                else:
-                    # break as soon as we see a non-deliverable message
-                    break
+
+            if len(self.msgqueue) > 0:
+                self.msgqueue.sort(key=lambda m: m.priority)
+                logging.debug('Sorted Queue: {}'.format(self.msgqueue))
+                for i, msg in enumerate(self.msgqueue):
+                    if msg.deliverable:
+                        logging.debug('Delivering msg {}'.format(msg))
+                        del self.msgqueue[i]
+                        self.disp_func(msg)
+                    else:
+                        # break as soon as we see a non-deliverable message
+                        break
             self.queue_mutex.release()
 
 
