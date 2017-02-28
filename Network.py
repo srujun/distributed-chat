@@ -3,6 +3,7 @@ from __future__ import print_function
 import copy
 import cPickle
 from cStringIO import StringIO
+from datetime import datetime
 import logging
 from operator import add
 import socket
@@ -198,7 +199,7 @@ class Network:
 
     def send_msg(self, msg, host):
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
-        logging.info('SEND time={}, msg={}'.format(time.time(), msg))
+        logging.info('SEND time={}, msg={}'.format(datetime.now(), msg))
 
         pickled = cPickle.dumps(msg, cPickle.HIGHEST_PROTOCOL)
         totalsent = 0
@@ -231,7 +232,7 @@ class Network:
 
     def handle_message(self, message):
         logging.debug('Handle message: {}'.format(message))
-        logging.info('HANDLE time={}, msg={}'.format(time.time(), message))
+        logging.info('HANDLE time={}, msg={}'.format(datetime.now(), message))
 
         # normal string display
         if isinstance(message, str):
