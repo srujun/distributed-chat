@@ -266,7 +266,7 @@ class Network:
             # update the counter
             self.counter_mutex.acquire()
             logging.debug('Counter update from {}'.format(self.counter))
-            self.counter = max(self.counter, message.priority) + 1
+            self.counter = int(max(self.counter, message.priority)) + 1
             logging.debug('Counter update to {}'.format(self.counter))
             self.counter_mutex.release()
 
@@ -323,7 +323,7 @@ class Network:
             # update the counter
             self.counter_mutex.acquire()
             logging.debug('Counter update from {}'.format(self.counter))
-            self.counter = max(self.counter, message.priority) + 1
+            self.counter = int(max(self.counter, message.priority)) + 1
             logging.debug('Counter update to {}'.format(self.counter))
             self.counter_mutex.release()
 
