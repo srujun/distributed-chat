@@ -143,7 +143,10 @@ class Network:
 
         # add msg to msgqueue if it is a new chat message
         if msg.msgtype == Message.CHAT:
-            qmsg = copy.deepcopy(msg)
+            # qmsg = copy.deepcopy(msg)
+            qmsg = Message(Message.CHAT, msg.origin, text=msg.text,
+                           msgid=msg.msgid, username=msg.username)
+            qmsg.alive_set = copy(msg.alive_set)
 
             self.counter_mutex.acquire()
             self.counter += 1
