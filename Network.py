@@ -332,7 +332,7 @@ class Network:
             logging.debug('Marking deliverable!')
             logging.debug('Queue: {}'.format(self.msgqueue))
 
-            self.queue_mutex.release()
+            # TODO: this release was there before self.queue_mutex.release()
 
         else:
             logging.warning('Got unknown msg type!')
