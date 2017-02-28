@@ -141,6 +141,9 @@ class Network:
             except socket.timeout:
                 time.sleep(1)
                 continue
+            except socket.error:
+                self.handle_crash(host)
+                break
 
 
     def bcast_msg(self, msg, destinations=[], wait=True):
