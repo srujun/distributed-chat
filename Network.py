@@ -310,7 +310,8 @@ class Network:
                                 msgid=orig.msgid)
                 final.priority = orig.priority
                 self.queue_mutex.release()
-                self.bcast_msg(final, wait=False)
+                self.bcast_msg(final, destinations=list(received_proposals),
+                               wait=False)
             else:
                 self.queue_mutex.release()
                 pass
@@ -364,19 +365,22 @@ class Network:
         logging.debug('Removing crashed node from alive list')
         self.alive_mutex.acquire()
         # remove crashed node from alive list
+        self.alive[host].close()
         del self.alive[host]
         self.alive_mutex.release()
 
         logging.debug('Acquiring Queue mutex')
         self.queue_mutex.acquire()
 
+        delete_idx = []
+        # map of FINAL msg to a list of destinations
+        final_bcast = {}
+
         for i, msg in enumerate(self.msgqueue):
             # msg was originally sent by the crashed node
             if msg.origin == host:
                 logging.debug('Deleting msg {}'.format(msg))
-                # delete the message (regardless of deliverability)
-                del self.msgqueue[i]
-                logging.debug('Queue: {}'.format(self.msgqueue))
+                delete_idx.append(i)
 
             # msg was sent by me, waiting for proposal from crashed node
             elif msg.origin == Network.get_ip():
@@ -394,11 +398,11 @@ class Network:
                 logging.debug('Checking if can be delivered...')
                 # check if this can be delivered
                 if msg.alive_set & alive_rn == received_proposals:
-                    self.queue_mutex.acquire()
+                    # self.queue_mutex.acquire()
                     propmax = max(msg.proposals, key=lambda m: m.priority).priority
                     logging.debug('Propmax: {}'.format(propmax))
                     logging.debug('Selfmax: {}'.format(msg.priority))
-                    msg.priority = max(orig.priority, propmax)
+                    msg.priority = max(msg.priority, propmax)
                     msg.deliverable = True
                     self.msgqueue.sort(key=lambda m: m.priority)
                     # self.queue_mutex.release()
@@ -411,11 +415,21 @@ class Network:
                     final = Message(Message.FINAL, Network.get_ip(),
                                     msgid=msg.msgid)
                     final.priority = msg.priority
-                    self.queue_mutex.release()
-                    self.bcast_msg(final, wait=True)
-                    self.queue_mutex.acquire()
+                    # self.queue_mutex.release()
+                    final_bcast[final] = list(received_proposals)
+                    # self.queue_mutex.acquire()
+
+        # finally delete those messages
+        for idx in sorted(delete_idx, reverse=True):
+            self.msgqueue.pop(idx)
 
         self.queue_mutex.release()
+
+        # bcast final for those messages that have become deliverable
+        # because of the crash
+        for finalmsg, dest in final_bcast:
+            self.bcast_msg(finalmsg, destinations=dest, wait=True)
+
         self.disp_func('{} is now offline...'.format(host))
 
 
