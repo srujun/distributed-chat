@@ -428,11 +428,12 @@ class Network:
             if len(self.msgqueue) > 0:
                 self.msgqueue.sort(key=lambda m: m.priority)
                 logging.debug('Sorted Queue: {}'.format(self.msgqueue))
-                for i, msg in enumerate(self.msgqueue):
-                    if msg.deliverable:
-                        logging.debug('Delivering msg {}'.format(msg))
-                        del self.msgqueue[i]
-                        self.disp_func(msg)
+                for i in range(len(self.msgqueue)):
+                    if self.msgqueue[i].deliverable:
+                        logging.debug('Delivering msg {}'.format(
+                            self.msgqueue[i]
+                        ))
+                        self.disp_func(self.msgqueue.pop([i]))
                     else:
                         # break as soon as we see a non-deliverable message
                         break
