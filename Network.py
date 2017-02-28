@@ -196,6 +196,7 @@ class Network:
 
         while totalsent < len(pickled):
             try:
+                logging.debug('Sending bytes...')
                 sent = sock.send(pickled[totalsent:])
             except socket.error:
                 self.handle_crash(host)
@@ -424,3 +425,12 @@ class Message:
         return fmt.format(
             self.msgtype, self.origin, self.msgid, self.username, self.text,
             self.priority, self.deliverable)
+
+    def __getstate__(self):
+        odict = self.__dict__.copy()
+        del odict['proposals_mutex']
+        return odict
+
+    def __setstate__(self, ndict):
+        self.__dict__.update(ndict)
+        self.__dict__['proposals_mutex'] = threading.RLock()
