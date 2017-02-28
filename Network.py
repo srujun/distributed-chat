@@ -424,6 +424,7 @@ class Network:
         while True:
             time.sleep(0.5)
             self.queue_mutex.acquire()
+            self.msgqueue.sort(key=lambda m: m.priority)
             for i, msg in enumerate(self.msgqueue):
                 if msg.deliverable:
                     logging.debug('Delivering msg {}'.format(msg))
