@@ -123,6 +123,7 @@ class Network:
                 try:
                     sock = self.alive[host]
                 except KeyError:
+                    logging.debug('{} died while in recv!'.format(host))
                     self.alive_mutex.release()
                     break
                 self.alive_mutex.release()
@@ -202,7 +203,12 @@ class Network:
         totalsent = 0
 
         self.alive_mutex.acquire()
-        sock = self.alive[host]
+        try:
+            sock = self.alive[host]
+        except KeyError:
+            logging.debug('{} died while in send!'.format(host))
+            self.alive_mutex.release()
+            return
         self.alive_mutex.release()
 
         while totalsent < len(pickled):
@@ -367,10 +373,16 @@ class Network:
     def handle_crash(self, host):
         logging.debug('{} crashed!'.format(host))
         logging.debug('Removing crashed node from alive list')
+
         self.alive_mutex.acquire()
         # remove crashed node from alive list
-        self.alive[host].close()
-        del self.alive[host]
+        try:
+            self.alive[host].close()
+            del self.alive[host]
+        except KeyError:
+            logging.debug('{} has already been killed'.format(host))
+            self.alive_mutex.release()
+            return
         self.alive_mutex.release()
 
         logging.debug('Acquiring Queue mutex')
