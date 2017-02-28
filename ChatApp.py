@@ -53,4 +53,7 @@ def main(stdscr):
 
 if __name__ == '__main__':
     logging.basicConfig(filename='app.log', level=logging.DEBUG)
+    logging.info('============================')
+    logging.info('==== Welcome to ChatApp ====')
+    logging.info('============================')
     curses.wrapper(main)
