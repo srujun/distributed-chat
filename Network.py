@@ -47,7 +47,7 @@ class Network:
         self.server.start()
 
         for node, port in nodelist:
-            logging.debug('Connecting to ' + node + ':' + str(port))
+            logging.info('Connecting to ' + node + ':' + str(port))
             if node == socket.gethostname():
                 logging.debug('Not gonna connect to myself...')
                 continue
@@ -58,7 +58,7 @@ class Network:
                 logging.debug('Could not connect')
                 pass
             else:
-                logging.debug('Connection successful!')
+                logging.info('Connection successful at {}'.format(datetime.now()))
 
                 self.alive_mutex.acquire()
                 self.alive[socket.gethostbyname(node)] = sock
@@ -97,7 +97,9 @@ class Network:
                 pass
             else:
                 ip, port = addr
-                logging.debug('Got connection from ' + ip)
+                logging.debug('Got connection from {} at {}'.format(
+                    ip, datetime.now()
+                ))
                 self.disp_func('{} has come online!'.format(ip))
 
                 self.alive_mutex.acquire()
@@ -374,7 +376,7 @@ class Network:
 
 
     def handle_crash(self, host):
-        logging.debug('{} crashed!'.format(host))
+        logging.info('{} crashed at {}!'.format(host, datetime.now()))
         logging.debug('Removing crashed node from alive list')
 
         self.alive_mutex.acquire()
@@ -482,6 +484,7 @@ class Network:
 
 
     def close(self):
+        logging.info('Going offline at {}'.format(datetime.now()))
         logging.debug('Closing all sockets')
         for host in self.alive.keys():
             self.alive[host].close()
