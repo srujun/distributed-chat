@@ -1,9 +1,10 @@
 from __future__ import print_function
 
 import copy
+import cPickle
+from cStringIO import StringIO
 import logging
 from operator import add
-import cPickle
 import socket
 import sys
 import threading
@@ -123,16 +124,18 @@ class Network:
                 self.alive_mutex.release()
 
                 pickled = sock.recv(2048)
-                logging.debug('Recv got {} bytes'.format(len(pickled)))
-                if not pickled:
+                numbytes = len(pickled)
+                logging.debug('Recv got {} bytes'.format(numbytes))
+
+                if numbytes == 0:
                     self.handle_crash(host)
                     break
 
-                message = cPickle.loads(pickled)
-                if not isinstance(message, Message):
-                    logging.warning('Unpickling received msg unsuccessful')
-                else:
+                pbuf = StringIO(pickled)
+                while pbuf.tell() < numbytes:
+                    message = cPickle.load(pbuf)
                     self.handle_message(message)
+
                 time.sleep(0.5)
 
             except socket.timeout:
@@ -191,7 +194,7 @@ class Network:
     def send_msg(self, msg, host):
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
 
-        pickled = cPickle.dumps(msg)
+        pickled = cPickle.dumps(msg, cPickle.HIGHEST_PROTOCOL)
         totalsent = 0
 
         self.alive_mutex.acquire()
