@@ -19,15 +19,15 @@ class Network:
         self.nodelist = nodelist
         # map from host ip (str) -> socket
         self.alive = {}
-        self.alive_mutex = threading.Lock()
+        self.alive_mutex = threading.RLock()
 
         # counter used for ISIS ordering
         self.counter = 0
-        self.counter_mutex = threading.Lock()
+        self.counter_mutex = threading.RLock()
 
         # message queue for ISIS ordering
         self.msgqueue = []
-        self.queue_mutex = threading.Lock()
+        self.queue_mutex = threading.RLock()
 
         # unique identifier for appending to each priority number
         # it is the sum of the digitis of the IP address
@@ -185,6 +185,7 @@ class Network:
         logging.debug('Sending to {}: {}'.format(host, str(msg)))
 
         pickled = pickle.dumps(msg)
+        logging.debug('Pickled!')
         totalsent = 0
 
         logging.debug('{} send acquire alive_mutex'.format(host))
@@ -412,7 +413,7 @@ class Message:
 
         # set of proposals
         self.proposals = set()
-        self.proposals_mutex = threading.Lock()
+        self.proposals_mutex = threading.RLock()
         # alive list at time of send
         self.alive_set = set()
 
