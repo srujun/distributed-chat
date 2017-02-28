@@ -140,6 +140,7 @@ class Network:
 
 
     def bcast_msg(self, msg, destinations=[], wait=True):
+        logging.debug('New bcast {}'.format(msg))
         threads = []
         is_all_hosts = False
 
