@@ -111,9 +111,11 @@ class Network:
     def recv_msg(self, host, callback):
         while True:
             try:
+                logging.log('{}: recv acquire alive_mutex'.format(host))
                 self.alive_mutex.acquire()
                 sock = self.alive[host]
                 self.alive_mutex.release()
+                logging.log('{}: recv release alive_mutex'.format(host))
 
                 pickled = sock.recv(2048)
                 if not pickled:
@@ -164,6 +166,7 @@ class Network:
             logging.debug('Queue: {}'.format(self.msgqueue))
 
         if is_all_hosts:
+            logging.debug('bcast acquire alive_mutex')
             self.alive_mutex.acquire()
         for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
@@ -171,6 +174,7 @@ class Network:
             t.start()
         if is_all_hosts:
             self.alive_mutex.release()
+            logging.debug('bcast release alive_mutex')
 
         if wait:
             for thread in threads:
@@ -184,9 +188,11 @@ class Network:
 
         totalsent = 0
 
+        logging.debug('{} send acquire alive_mutex'.format(host))
         self.alive_mutex.acquire()
         sock = self.alive[host]
         self.alive_mutex.release()
+        logging.debug('{} send release alive_mutex'.format(host))
 
         while totalsent < len(pickled):
             try:
