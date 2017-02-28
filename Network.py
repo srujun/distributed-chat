@@ -231,7 +231,7 @@ class Network:
 
     def handle_message(self, message):
         logging.debug('Handle message: {}'.format(message))
-        logging.info('HANDLE time={}, msg={}'.format(time.time(), msg))
+        logging.info('HANDLE time={}, msg={}'.format(time.time(), message))
 
         # normal string display
         if isinstance(message, str):
