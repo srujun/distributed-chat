@@ -51,7 +51,7 @@ class Network:
                 pass
             else:
                 logging.debug('Connection successful!')
-                self.alive[socket.gethostbyname(node)] = [sock, port]
+                self.alive[socket.gethostbyname(node)] = sock
 
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
@@ -83,7 +83,6 @@ class Network:
                 ip, port = addr
                 logging.debug('Got connection from ' + ip)
                 self.alive[ip] = [clientsocket, port]
-
                 self.start_receivers(receivers=[ip])
 
 
@@ -132,24 +131,31 @@ class Network:
         totalsent = 0
         while totalsent < len(pickled):
             try:
-                sent = self.alive[host][0].send(pickled[totalsent:])
+                sent = self.alive[host].send(pickled[totalsent:])
             except socket.error:
                 # TODO: show offline at the right time
                 callback(host + " went offline...")
                 del self.alive[host]
                 logging.debug(host + ' went offline...')
                 break
+            except KeyError:
+                # TODO: the host has been removed
+                callback(host + " went offline...")
+                logging.debug(host + ' went offline...')
+                break
             if sent == 0:
                 # lost connection
                 logging.debug('Could not send msg, lost connection!')
                 del self.alive[host]
+                break
+
             totalsent += sent
 
 
     def recv_msg(self, host, callback):
         while True:
             try:
-                pickled = self.alive[host][0].recv(1024)
+                pickled = self.alive[host].recv(1024)
                 if not pickled:
                     # TODO: show offline at the right time
                     callback(host + " went offline...")
@@ -168,6 +174,11 @@ class Network:
             except socket.timeout:
                 time.sleep(1)
                 continue
+            except KeyError:
+                # TODO: the host has been removed
+                callback(host + " went offline...")
+                logging.debug(host + ' went offline...')
+                break
 
 
     def handle_message(self, message):
@@ -228,7 +239,7 @@ class Network:
 
     def close(self):
         for host in self.alive.keys():
-            self.alive[host][0].close()
+            self.alive[host].close()
 
 
 class Message:
