@@ -111,11 +111,11 @@ class Network:
     def recv_msg(self, host, callback):
         while True:
             try:
-                logging.log('{}: recv acquire alive_mutex'.format(host))
+                logging.debug('{}: recv acquire alive_mutex'.format(host))
                 self.alive_mutex.acquire()
                 sock = self.alive[host]
                 self.alive_mutex.release()
-                logging.log('{}: recv release alive_mutex'.format(host))
+                logging.debug('{}: recv release alive_mutex'.format(host))
 
                 pickled = sock.recv(2048)
                 if not pickled:
