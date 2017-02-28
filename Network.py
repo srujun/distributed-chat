@@ -345,12 +345,13 @@ class Network:
         logging.debug('Acquiring Queue mutex')
         self.queue_mutex.acquire()
 
-        for msg in self.msgqueue:
+        for i, msg in enumerate(self.msgqueue):
             # msg was originally sent by the crashed node
             if msg.origin == host:
                 logging.debug('Deleting msg {}'.format(msg))
                 # delete the message (regardless of deliverability)
-                del self.msgqueue[msg]
+                del self.msgqueue[i]
+                logging.debug('Queue: {}'.format(self.msgqueue))
 
             # msg was sent by me, waiting for proposal from crashed node
             elif msg.origin == Network.get_ip():
