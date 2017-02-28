@@ -112,14 +112,13 @@ class Network:
         while True:
             try:
                 self.alive_mutex.acquire()
-                pickled = self.alive[host].recv(2048)
+                sock = self.alive[host]
+                self.alive_mutex.release()
 
+                pickled = sock.recv(2048)
                 if not pickled:
-                    self.alive_mutex.release()
                     self.handle_crash(host)
                     break
-
-                self.alive_mutex.release()
 
                 message = pickle.loads(pickled)
                 if not isinstance(message, Message):
@@ -182,22 +181,21 @@ class Network:
 
         totalsent = 0
         self.alive_mutex.acquire()
+        sock = self.alive[host]
+        self.alive_mutex.release()
 
         while totalsent < len(pickled):
             try:
-                sent = self.alive[host].send(pickled[totalsent:])
+                sent = sock.send(pickled[totalsent:])
             except socket.error:
-                self.alive_mutex.release()
                 self.handle_crash(host)
                 break
             if sent == 0:
                 logging.debug('Could not send msg, lost connection!')
-                self.alive_mutex.release()
                 self.handle_crash(host)
                 break
 
             totalsent += sent
-        self.alive_mutex.release()
 
 
     def handle_message(self, message):
