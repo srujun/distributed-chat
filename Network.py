@@ -146,7 +146,7 @@ class Network:
             # qmsg = copy.deepcopy(msg)
             qmsg = Message(Message.CHAT, msg.origin, text=msg.text,
                            msgid=msg.msgid, username=msg.username)
-            qmsg.alive_set = copy(msg.alive_set)
+            qmsg.alive_set = msg.alive_set.copy()
 
             self.counter_mutex.acquire()
             self.counter += 1
