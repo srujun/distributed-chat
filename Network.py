@@ -172,9 +172,7 @@ class Network:
             qmsg.alive_set = set(self.alive.keys())
 
             self.queue_mutex.acquire()
-            logging.debug('YOLO 175')
             self.msgqueue.append(qmsg)
-            logging.debug('YOLO 177')
             self.msgqueue.sort(key=lambda m: m.priority)
             logging.debug('Queue: {}'.format(self.msgqueue))
             self.queue_mutex.release()
@@ -245,9 +243,7 @@ class Network:
 
             # store msg in queue with the proposed priority
             self.queue_mutex.acquire()
-            logging.debug('YOLO 248')
             self.msgqueue.append(message)
-            logging.debug('YOLO 250')
             self.msgqueue.sort(key=lambda m: m.priority)
             logging.debug('Queue: {}'.format(self.msgqueue))
             self.queue_mutex.release()
@@ -262,7 +258,6 @@ class Network:
             # get the original msg from the queue
             self.queue_mutex.acquire()
             try:
-                logging.debug('YOLO 265')
                 orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
             except StopIteration:
                 # TODO: check this release
@@ -305,7 +300,6 @@ class Network:
                 logging.debug('Selfmax: {}'.format(orig.priority))
                 orig.priority = max(orig.priority, propmax)
                 orig.deliverable = True
-                logging.debug('YOLO 308')
                 self.msgqueue.sort(key=lambda m: m.priority)
                 # self.queue_mutex.release()
                 logging.debug('Marking deliverable!')
@@ -328,7 +322,6 @@ class Network:
             # get the original msg from the queue
             self.queue_mutex.acquire()
             try:
-                logging.debug('YOLO 331')
                 orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
             except StopIteration:
                 # TODO: check this release
@@ -355,7 +348,6 @@ class Network:
             # mark as deliverable
             # self.queue_mutex.acquire()
             orig.deliverable = True
-            logging.debug('YOLO 358')
             self.msgqueue.sort(key=lambda m: m.priority)
             # self.queue_mutex.release()
             logging.debug('Marking deliverable!')
@@ -378,13 +370,11 @@ class Network:
         logging.debug('Acquiring Queue mutex')
         self.queue_mutex.acquire()
 
-        logging.debug('YOLO 381')
         for i, msg in enumerate(self.msgqueue):
             # msg was originally sent by the crashed node
             if msg.origin == host:
                 logging.debug('Deleting msg {}'.format(msg))
                 # delete the message (regardless of deliverability)
-                logging.debug('YOLO 387')
                 del self.msgqueue[i]
                 logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -410,7 +400,6 @@ class Network:
                     logging.debug('Selfmax: {}'.format(msg.priority))
                     msg.priority = max(orig.priority, propmax)
                     msg.deliverable = True
-                    logging.debug('YOLO 413')
                     self.msgqueue.sort(key=lambda m: m.priority)
                     # self.queue_mutex.release()
 
@@ -435,22 +424,21 @@ class Network:
             time.sleep(0.5)
             self.queue_mutex.acquire()
 
-            logging.debug('YOLO 438')
-            if len(self.msgqueue) > 0:
-                logging.debug('YOLO 440')
+            msgslen = len(self.msgqueue)
+            count = 0
+            if msgslen > 0:
                 self.msgqueue.sort(key=lambda m: m.priority)
-                logging.debug('Sorted Queue: {}'.format(self.msgqueue))
-                for i in range(len(self.msgqueue)):
-                    logging.debug('YOLO 444')
-                    if self.msgqueue[i].deliverable:
-                        logging.debug('Delivering msg {}'.format(
-                            self.msgqueue[i]
-                        ))
-                        logging.debug('YOLO 449')
-                        self.disp_func(self.msgqueue.pop(i))
+                for msg in self.msgqueue:
+                    if msg.deliverable:
+                        count += 1
+                        logging.debug('Delivering msg {}'.format(msg))
+                        self.disp_func(msg)
                     else:
                         # break as soon as we see a non-deliverable message
                         break
+
+                # pop as many msgs from the queue
+                del self.msgqueue[:count]
             self.queue_mutex.release()
 
 
