@@ -97,7 +97,7 @@ class Network:
                 pass
             else:
                 ip, port = addr
-                logging.debug('Got connection from {} at {}'.format(
+                logging.info('Got connection from {} at {}'.format(
                     ip, datetime.now()
                 ))
                 self.disp_func('{} has come online!'.format(ip))
