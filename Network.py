@@ -297,9 +297,12 @@ class Network:
             orig.proposals_mutex.release()
 
             if orig.alive_set & alive_rn == received_proposals:
-                orig.deliverable = True
                 orig.priority = max(orig.priority,
                                 max(orig.proposals, key=lambda m: m.priority))
+                self.queue_mutex.acquire()
+                orig.deliverable = True
+                self.msgqueue.sort(key=lambda m: m.priority)
+                self.queue_mutex.release()
                 logging.debug('Marking deliverable!')
                 logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -340,7 +343,10 @@ class Network:
             self.counter_mutex.release()
 
             # mark as deliverable
+            self.queue_mutex.acquire()
             orig.deliverable = True
+            self.msgqueue.sort(key=lambda m: m.priority)
+            self.queue_mutex.release()
             logging.debug('Marking deliverable!')
             logging.debug('Queue: {}'.format(self.msgqueue))
 
