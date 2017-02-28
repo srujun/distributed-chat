@@ -163,7 +163,8 @@ class Network:
 
             logging.debug('Queue: {}'.format(self.msgqueue))
 
-        self.alive_mutex.acquire()
+        if is_all_hosts:
+            self.alive_mutex.acquire()
         for host in destinations:
             t = threading.Thread(target=self.send_msg, args=(msg, host))
             threads.append(t)
@@ -182,6 +183,7 @@ class Network:
         pickled = pickle.dumps(msg)
 
         totalsent = 0
+
         self.alive_mutex.acquire()
         sock = self.alive[host]
         self.alive_mutex.release()
