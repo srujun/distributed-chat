@@ -433,7 +433,7 @@ class Network:
                         logging.debug('Delivering msg {}'.format(
                             self.msgqueue[i]
                         ))
-                        self.disp_func(self.msgqueue.pop([i]))
+                        self.disp_func(self.msgqueue.pop(i))
                     else:
                         # break as soon as we see a non-deliverable message
                         break
