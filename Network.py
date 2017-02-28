@@ -413,6 +413,12 @@ class Network:
             self.queue_mutex.release()
 
 
+    def print_queue(self):
+        self.queue_mutex.acquire()
+        self.disp_func('Msg Queue: {}'.format(self.msgqueue))
+        self.queue_mutex.release()
+
+
     def close(self):
         logging.debug('Closing all sockets')
         for host in self.alive.keys():

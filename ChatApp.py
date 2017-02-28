@@ -21,7 +21,8 @@ def main(stdscr):
 
     ci.add_message("Welcome to ECE428 Chat App!")
     ci.add_message('Type "/quit" to exit')
-    ci.add_message('Type "/ask" to see who\'s online')
+    ci.add_message('Type "/online" to see who\'s online')
+    ci.add_message('Type "/queue" to see message queue')
 
     network = Network(nodelist, ci.add_message)
     ip = Network.get_ip()
@@ -40,8 +41,11 @@ def main(stdscr):
             network.close()
             logging.info('Going offline. Bye!')
             break
-        if instr == '/ask':
+        if instr == '/online':
             ci.add_message('Online: ' + str(network.alive.keys()))
+            continue
+        if instr == '/queue':
+            network.print_queue()
             continue
 
         message = Message(Message.CHAT, ip, text=instr, username=username)
