@@ -123,6 +123,7 @@ class Network:
                 self.alive_mutex.release()
 
                 pickled = sock.recv(2048)
+                logging.debug('Recv got {} bytes'.format(len(pickled)))
                 if not pickled:
                     self.handle_crash(host)
                     break
@@ -210,7 +211,8 @@ class Network:
                 break
 
             totalsent += sent
-        logging.debug('Msg send successful')
+        logging.debug('Send successful {} bytes, '
+                      'msg: {}'.format(totalsent, msg))
 
 
     def handle_message(self, message):
