@@ -174,9 +174,8 @@ class Network:
             self.queue_mutex.acquire()
             self.msgqueue.append(qmsg)
             self.msgqueue.sort(key=lambda m: m.priority)
-            self.queue_mutex.release()
-
             logging.debug('Queue: {}'.format(self.msgqueue))
+            self.queue_mutex.release()
 
         if is_all_hosts:
             self.alive_mutex.acquire()
@@ -267,7 +266,7 @@ class Network:
                 return
 
             # TODO: check this release
-            self.queue_mutex.release()
+            # self.queue_mutex.release()
 
             # add this proposal to the original message's proposals set
             orig.proposals_mutex.acquire()
@@ -295,14 +294,14 @@ class Network:
             orig.proposals_mutex.release()
 
             if orig.alive_set & alive_rn == received_proposals:
-                self.queue_mutex.acquire()
+                # self.queue_mutex.acquire()
                 propmax = max(orig.proposals, key=lambda m: m.priority).priority
                 logging.debug('Propmax: {}'.format(propmax))
                 logging.debug('Selfmax: {}'.format(orig.priority))
                 orig.priority = max(orig.priority, propmax)
                 orig.deliverable = True
                 self.msgqueue.sort(key=lambda m: m.priority)
-                self.queue_mutex.release()
+                # self.queue_mutex.release()
                 logging.debug('Marking deliverable!')
                 logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -310,10 +309,10 @@ class Network:
                 final = Message(Message.FINAL, Network.get_ip(),
                                 msgid=orig.msgid)
                 final.priority = orig.priority
-                # TODO: check self.queue_mutex.release()
+                self.queue_mutex.release()
                 self.bcast_msg(final, wait=False)
             else:
-                # TODO: check self.queue_mutex.release()
+                self.queue_mutex.release()
                 pass
 
         # sender has sent final priority
@@ -331,13 +330,13 @@ class Network:
                 return
 
             # TODO: check this release
-            self.queue_mutex.release()
+            # self.queue_mutex.release()
 
             # update msg final priority
-            self.queue_mutex.acquire()
+            # self.queue_mutex.acquire()
             logging.debug('Finalmax: {}'.format(message.priority))
             orig.priority = message.priority
-            self.queue_mutex.release()
+            # self.queue_mutex.release()
 
             # update the counter
             self.counter_mutex.acquire()
@@ -347,14 +346,14 @@ class Network:
             self.counter_mutex.release()
 
             # mark as deliverable
-            self.queue_mutex.acquire()
+            # self.queue_mutex.acquire()
             orig.deliverable = True
             self.msgqueue.sort(key=lambda m: m.priority)
-            self.queue_mutex.release()
+            # self.queue_mutex.release()
             logging.debug('Marking deliverable!')
             logging.debug('Queue: {}'.format(self.msgqueue))
 
-            # TODO: this release was there before self.queue_mutex.release()
+            self.queue_mutex.release()
 
         else:
             logging.warning('Got unknown msg type!')
@@ -402,7 +401,7 @@ class Network:
                     msg.priority = max(orig.priority, propmax)
                     msg.deliverable = True
                     self.msgqueue.sort(key=lambda m: m.priority)
-                    self.queue_mutex.release()
+                    # self.queue_mutex.release()
 
                     logging.debug('Marking deliverable with '
                                   'prio {}!'.format(msg.priority))
