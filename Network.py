@@ -7,6 +7,7 @@ from datetime import datetime
 import logging
 from operator import add
 import socket
+from struct import pack, unpack
 import sys
 import threading
 import time
@@ -131,7 +132,9 @@ class Network:
                     break
                 self.alive_mutex.release()
 
-                pickled = sock.recv(2048)
+                picklen = unpack('>I', sock.recv(4))[0]
+
+                pickled = sock.recv(picklen)
                 numbytes = len(pickled)
                 logging.debug('Recv got {} bytes'.format(numbytes))
 
@@ -215,6 +218,9 @@ class Network:
             self.alive_mutex.release()
             return
         self.alive_mutex.release()
+
+        # send the len
+        sock.send(pack('>I', len(pickled)))
 
         while totalsent < len(pickled):
             try:
