@@ -1,4 +1,8 @@
 ECE 428 - MP1
 =============
 
-Run using `./runapp.sh` or `sh runapp.sh`
+Distributed Chat application with totally-ordered multicast.
+
+Run using `./runapp.sh` or `sh runapp.sh`.
+
+Data is logged to `app.log` file.

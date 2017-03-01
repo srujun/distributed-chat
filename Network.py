@@ -277,13 +277,9 @@ class Network:
             try:
                 orig = next(m for m in self.msgqueue if m.msgid == message.msgid)
             except StopIteration:
-                # TODO: check this release
                 self.queue_mutex.release()
                 logging.warning('Bogus proposal. ID: {}'.format(message.msgid))
                 return
-
-            # TODO: check this release
-            # self.queue_mutex.release()
 
             # add this proposal to the original message's proposals set
             orig.proposals_mutex.acquire()
@@ -311,14 +307,12 @@ class Network:
             orig.proposals_mutex.release()
 
             if orig.alive_set & alive_rn == received_proposals:
-                # self.queue_mutex.acquire()
                 propmax = max(orig.proposals, key=lambda m: m.priority).priority
                 logging.debug('Propmax: {}'.format(propmax))
                 logging.debug('Selfmax: {}'.format(orig.priority))
                 orig.priority = max(orig.priority, propmax)
                 orig.deliverable = True
                 self.msgqueue.sort(key=lambda m: m.priority)
-                # self.queue_mutex.release()
                 logging.debug('Marking deliverable!')
                 logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -347,14 +341,9 @@ class Network:
                 logging.warning('Bogus proposal. ID: {}'.format(message.msgid))
                 return
 
-            # TODO: check this release
-            # self.queue_mutex.release()
-
             # update msg final priority
-            # self.queue_mutex.acquire()
             logging.debug('Finalmax: {}'.format(message.priority))
             orig.priority = message.priority
-            # self.queue_mutex.release()
 
             # update the counter
             self.counter_mutex.acquire()
@@ -364,10 +353,8 @@ class Network:
             self.counter_mutex.release()
 
             # mark as deliverable
-            # self.queue_mutex.acquire()
             orig.deliverable = True
             self.msgqueue.sort(key=lambda m: m.priority)
-            # self.queue_mutex.release()
             logging.debug('Marking deliverable!')
             logging.debug('Queue: {}'.format(self.msgqueue))
 
@@ -428,7 +415,6 @@ class Network:
                     msg.priority = max(msg.priority, propmax)
                     msg.deliverable = True
                     self.msgqueue.sort(key=lambda m: m.priority)
-                    # self.queue_mutex.release()
 
                     logging.debug('Marking deliverable with '
                                   'prio {}!'.format(msg.priority))
@@ -499,7 +485,6 @@ class Message:
     FINAL = 'final'
 
     def __init__(self, msgtype, origin, msgid=None, text='', username=''):
-        # raise TypeError('Message type unknown' + str(msgtype))
         self.msgtype = msgtype
         self.origin = origin
         if not msgid:
