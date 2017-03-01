@@ -36,6 +36,9 @@ class Network:
         # it is the sum of the digitis of the IP address
         self.uid = reduce(add, map(int, Network.get_ip().split('.')))
 
+        oldtimeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(timeout)
+
         self.disp_func = disp_func
 
         # start the server thread
@@ -63,9 +66,6 @@ class Network:
 
         logging.debug('# alive = ' + str(len(self.alive)))
         logging.debug(str(self.alive))
-
-        oldtimeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(timeout)
 
         # start the delivery thread
         self.delivery = threading.Thread(target=self.do_delivery)
