@@ -77,7 +77,7 @@ class ChatInterface:
                 self.win_messages.addstr('{')
                 self.win_messages.addstr(message.username, curses.color_pair(1))
                 self.win_messages.addstr('}: ')
-            else if username:
+            elif username:
                 self.win_messages.addstr('{')
                 self.win_messages.addstr(username, curses.color_pair(1))
                 self.win_messages.addstr('}: ')
