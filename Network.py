@@ -419,10 +419,14 @@ class Network:
                 # check if this can be delivered
                 if msg.alive_set & alive_rn == received_proposals:
                     # self.queue_mutex.acquire()
-                    propmax = max(msg.proposals, key=lambda m: m.priority).priority
-                    logging.debug('Propmax: {}'.format(propmax))
-                    logging.debug('Selfmax: {}'.format(msg.priority))
-                    msg.priority = max(msg.priority, propmax)
+                    if msg.proposals:
+                        propmax = max(msg.proposals, key=lambda m: m.priority).priority
+                        logging.debug('Propmax: {}'.format(propmax))
+                        logging.debug('Selfmax: {}'.format(msg.priority))
+                        msg.priority = max(msg.priority, propmax)
+                    else:
+                        # TODO: maybe this works?
+                        msg.priority = self.counter
                     msg.deliverable = True
                     self.msgqueue.sort(key=lambda m: m.priority)
 
