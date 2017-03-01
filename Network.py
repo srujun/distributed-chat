@@ -225,7 +225,16 @@ class Network:
         self.alive_mutex.release()
 
         # send the len
-        sock.send(pack('>I', len(pickled)))
+        try:
+            sent = sock.send(pack('>I', len(pickled)))
+        except socket.error as e:
+            logging.warning('Socket error: {}'.format(e.errno))
+            self.handle_crash(host)
+            break
+        if sent == 0:
+            logging.debug('Could not send msg, lost connection!')
+            self.handle_crash(host)
+            break
 
         while totalsent < len(pickled):
             try:
@@ -241,8 +250,7 @@ class Network:
                 break
 
             totalsent += sent
-        logging.debug('Send successful {} bytes, '
-                      'msg: {}'.format(totalsent, msg))
+        logging.debug('Send successful {} bytes, msg: {}'.format(totalsent, msg))
 
 
     def handle_message(self, message):
