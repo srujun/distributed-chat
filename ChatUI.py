@@ -59,8 +59,10 @@ class ChatInterface:
                 message = message + '\n'
 
             if username:
-                username = username + ": "
-            self.win_messages.addstr(username + message)
+                self.win_messages.addstr('{')
+                self.win_messages.addstr(username, curses.color_pair(1))
+                self.win_messages.addstr('}: ')
+            self.win_messages.addstr(message)
             self.win_messages.refresh()
 
         elif isinstance(message, Message) and message.msgtype == Message.CHAT:
@@ -68,11 +70,17 @@ class ChatInterface:
 
             if not message.text.endswith('\n'):
                 msgtext = message.text + '\n'
+            else:
+                msgtext = message.text
 
             if message.username:
-                msgtext = message.username + ": " + msgtext
-            else:
-                msgtext = username + ": " + msgtext
+                self.win_messages.addstr('{')
+                self.win_messages.addstr(message.username, curses.color_pair(1))
+                self.win_messages.addstr('}: ')
+            else if username:
+                self.win_messages.addstr('{')
+                self.win_messages.addstr(username, curses.color_pair(1))
+                self.win_messages.addstr('}: ')
 
             self.win_messages.addstr(msgtext)
             self.win_messages.refresh()
