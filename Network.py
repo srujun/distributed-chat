@@ -450,7 +450,7 @@ class Network:
 
         # bcast final for those messages that have become deliverable
         # because of the crash
-        for finalmsg, dest in final_bcast:
+        for finalmsg, dest in final_bcast.iteritems():
             self.bcast_msg(finalmsg, destinations=dest, wait=True)
 
         self.disp_func('{} is now offline...'.format(host))
