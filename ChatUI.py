@@ -60,7 +60,7 @@ class ChatInterface:
 
             if username:
                 self.win_messages.addstr('{')
-                self.win_messages.addstr(username, curses.color_pair(1))
+                self.win_messages.addstr(username)
                 self.win_messages.addstr('}: ')
             self.win_messages.addstr(message)
             self.win_messages.refresh()
@@ -75,11 +75,11 @@ class ChatInterface:
 
             if message.username:
                 self.win_messages.addstr('{')
-                self.win_messages.addstr(message.username, curses.color_pair(1))
+                self.win_messages.addstr(message.username)
                 self.win_messages.addstr('}: ')
             elif username:
                 self.win_messages.addstr('{')
-                self.win_messages.addstr(username, curses.color_pair(1))
+                self.win_messages.addstr(username)
                 self.win_messages.addstr('}: ')
 
             self.win_messages.addstr(msgtext)
