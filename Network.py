@@ -149,7 +149,8 @@ class Network:
             except socket.timeout:
                 time.sleep(1)
                 continue
-            except socket.error:
+            except socket.error as e:
+                logging.warning('Socket error: {}'.format(e.errno))
                 self.handle_crash(host)
                 break
 
@@ -219,7 +220,8 @@ class Network:
             try:
                 logging.debug('Sending bytes...')
                 sent = sock.send(pickled[totalsent:])
-            except socket.error:
+            except socket.error as e:
+                logging.warning('Socket error: {}'.format(e.errno))
                 self.handle_crash(host)
                 break
             if sent == 0:
