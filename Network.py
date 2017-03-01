@@ -230,11 +230,11 @@ class Network:
         except socket.error as e:
             logging.warning('Socket error: {}'.format(e.errno))
             self.handle_crash(host)
-            break
+            return
         if sent == 0:
             logging.debug('Could not send msg, lost connection!')
             self.handle_crash(host)
-            break
+            return
 
         while totalsent < len(pickled):
             try:
