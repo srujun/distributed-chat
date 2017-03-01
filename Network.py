@@ -133,9 +133,10 @@ class Network:
                 self.alive_mutex.release()
 
                 bytelen = sock.recv(4)
-                if bytelen == 0:
+                if len(bytelen) == 0:
                     self.handle_crash(host)
                     break
+
                 picklen = unpack('>I', bytelen)[0]
 
                 pickled = sock.recv(picklen)
